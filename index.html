@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DUO → S&P500 simulatie</title>
+  <title>DUO → S&P500 simulator</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
   <style>
@@ -79,12 +79,43 @@
     .inline-pair .tgl{min-width:unset;padding-inline:10px;height:44px}
     .field-full{grid-column:1/-1}
   </style>
+<style id="restore-rounded-theme">/* injected: restore earlier rounded navy theme */
+:root{--bg:#0f1420;--panel:rgba(255,255,255,.06);--text:#e9edf3;--muted:#9fb1c7;--accent:#6ea8fe;--accent2:#60d394;--shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);--radius:10px;--radius-input:12px;--chip-w:210px}
+body.light{--bg:#f4f7fb;--panel:rgba(0,0,0,.04);--text:#0d1117;--muted:#4b5563;--accent:#2563eb;--accent2:#16a34a}
+body{background:radial-gradient(1200px 600px at 80% -10%, rgba(110,168,254,.20), transparent 60%),radial-gradient(1000px 800px at 0% 100%, rgba(96,211,148,.20), transparent 60%), var(--bg)}
+.card{background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow)}
+.badge{padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--muted)}
+.controls{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;align-items:start}
+.field{display:grid;grid-template-rows:auto 44px;gap:6px}
+.field label{font-size:.9rem;color:var(--muted)}
+input[type="number"],input[type="date"],select{height:44px;border-radius:var(--radius-input);border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:var(--text);padding:0 12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
+.row-slider{grid-column:1/-1;display:grid;grid-template-columns:auto 1fr 92px;gap:12px;align-items:center}
+.toggles{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:8px 0;justify-content:flex-start}
+.tgl{display:inline-flex;gap:10px;align-items:center;cursor:pointer;padding:6px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);height:44px;min-width:var(--chip-w);justify-content:flex-start}
+.tgl .track{position:relative;width:60px;height:28px;border-radius:999px;background:rgba(255,255,255,.14);box-shadow:inset 0 1px 2px rgba(0,0,0,.25);transition:background .2s;flex:0 0 60px;margin-right:10px}
+.tgl .thumb{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#d1d5db;transition:transform .2s ease;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.tgl input:checked + .track{background:color-mix(in oklab,var(--accent),white 8%)}
+.tgl input:checked + .track .thumb{transform:translateX(32px);background:#fff}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kpi{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.08);padding:14px;border-radius:var(--radius);box-shadow:var(--shadow);display:grid;grid-template-rows:auto 1fr auto;aspect-ratio:1/1;overflow:hidden}
+.chart-wrap{height:360px}
+.tbl-wrap{overflow:auto;max-height:55vh;border-radius:var(--radius);border:1px solid rgba(255,255,255,.06)}
+#seriesToggles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:stretch;margin:10px 0}
+#seriesToggles .tgl{min-width:0;width:100%;padding-inline:12px}
+</style>
+<style id="light-contrast-and-badge">
+:root{--card-border: rgba(255,255,255,.10);}
+body.light{--card-border: rgba(15,23,42,.20); --shadow: 0 14px 34px rgba(15,23,42,.14), 0 3px 10px rgba(15,23,42,.10);} 
+.card,.kpi{border-color: var(--card-border)!important; box-shadow: var(--shadow, 0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04))!important;}
+input[type="number"],input[type="date"],select{border-color: var(--card-border)!important;}
+#viewModeBadge{transform:translateY(0);} 
+</style>
 </head>
 <body>
   <header>
     <div class="wrap">
       <h1>DUO → S&P500 simulatie</h1>
-      <div class="sub">Interactief inzicht in lenen bij DUO en beleggen in de S&P 500 — realtime, lokaal, met dark‑mode.</div>
+      <div class="sub">Simuleer lenen bij DUO en beleggen in de S&P 500 — lokaal en realtime.</div>
     </div>
   </header>
 
@@ -157,7 +188,6 @@
               <label class="tgl" id="tglInflWrap" aria-label="Inflatie-correctie" role="switch" aria-checked="false">
                 <input id="tglInfl" type="checkbox" />
                 <span class="track"><span class="thumb"></span></span>
-                
               </label>
             </div>
           </div>
@@ -168,7 +198,6 @@
               <label class="tgl" id="tglFXWrap" aria-label="FX-correctie" role="switch" aria-checked="false">
                 <input id="tglFX" type="checkbox" />
                 <span class="track"><span class="thumb"></span></span>
-                
               </label>
             </div>
           </div>
@@ -187,7 +216,7 @@
           </label>
         </div>
 
-        <div class="sub" style="margin-top:6px">Aanname: 24 maanden aanloopfase na <strong>einde studie/laatste DUO‑uitkering</strong>. Rente maandelijks samengesteld. Aflossing annuïtair over de gekozen looptijd. FX (USD/EUR) gebruikt **totale drift** over de periode (lineair via maandfactor) en werkt door in de portefeuille.</div>
+        <div class="sub" style="margin-top:6px">Aanname: 24 maanden aanloopfase na <strong>einde studie/laatste DUO‑uitkering</strong>. Rente maandelijks samengesteld. Aflossing annuïtair over de gekozen looptijd.</div>
         <div class="toolbar" style="margin-top:12px; gap:8px; flex-wrap:wrap;">
           <button id="btnReset" class="secondary">Reset</button>
         </div>
@@ -207,7 +236,7 @@
         </div>
 
         <div class="toggles" id="seriesToggles">
-          <label class="tgl" id="wrapNet" role="switch" aria-checked="true"><input id="togNet" type="checkbox" checked><span class="track"><span class="thumb"></span></span><span class="txt">Netto</span></label>
+          <label class="tgl" id="wrapNet" role="switch" aria-checked="false"><input id="togNet" type="checkbox"><span class="track"><span class="thumb"></span></span><span class="txt">Netto</span></label>
           <label class="tgl" id="wrapPort" role="switch" aria-checked="true"><input id="togPort" type="checkbox" checked><span class="track"><span class="thumb"></span></span><span class="txt">Portefeuille</span></label>
           <label class="tgl" id="wrapDebt" role="switch" aria-checked="false"><input id="togDebt" type="checkbox"><span class="track"><span class="thumb"></span></span><span class="txt">Schuld (overlay)</span></label>
         </div>
@@ -229,13 +258,13 @@
           </select>
         </div>
       </div>
-      <div class="sub" style="margin:8px 0">Scroll in de tabel; kop én eerste kolom blijven zichtbaar. Wissel tussen maand/kwartaal/jaar.</div>
       <div class="tbl-wrap">
         <table id="tbl">
           <thead>
             <tr>
               <th>Periode</th>
-              <th>Inleg (€)</th>
+              <th>Totale inleg (€)</th>
+              <th>DUO‑inleg (€)</th>
               <th>Eigen inleg (€)</th>
               <th>Aflossing DUO (€)</th>
               <th>Extern betaald (€)</th>
@@ -292,7 +321,6 @@
     function simulate(cfg) {
       const rL = Math.pow(1 + cfg.loanAPR, 1 / 12) - 1; // loan monthly
       const rI = Math.pow(1 + cfg.expAPR, 1 / 12) - 1;  // invest monthly
-      /* FX totaal over periode → maandfactor zetten nadat totalMonths is bepaald */
 
       const monthsBorrowed = monthsInclusive(cfg.start, cfg.end); // inclusive DUO
       const grad = cfg.end; const graceEnd = addMonths(grad, 24);
@@ -366,11 +394,64 @@
     }
 
     // ===== Table aggregation =====
-    function groupRows(sim){ const mode=gi('selTableView')?.value||'month'; const rows=[]; const pushRow=(key,idxs)=>{ const lastIdx=idxs[idxs.length-1]; const sum=(arr)=>idxs.reduce((a,i)=>a+(arr[i]||0),0); rows.push({ key, inleg: sum(sim.arrInlegTotal), inlegOwn: sum(sim.arrInlegOwn), pay: sum(sim.arrPay), external: sum(sim.arrExternalPay), rente: sum(sim.arrInt), schuld: sim.arrDebt[lastIdx], port: sim.arrPort[lastIdx], saldo: sim.arrNet[lastIdx] }); };
-      if (mode==='month'){ for (let i=0;i<sim.labels.length;i++) pushRow(sim.labels[i],[i]); }
-      else if (mode==='quarter'){ const groups={}; for (let i=0;i<sim.labels.length;i++){ const d=addMonths(new Date(gi('inpStart')?.value||Date.now()), i); const q=Math.floor(d.getMonth()/3)+1; const key=`${d.getFullYear()} Q${q}`; if(!groups[key]) groups[key]=[]; groups[key].push(i);} Object.keys(groups).forEach(k=>pushRow(k, groups[k])); }
-      else { const groups={}; for (let i=0;i<sim.labels.length;i++){ const d=addMonths(new Date(gi('inpStart')?.value||Date.now()), i); const key=`${d.getFullYear()}`; if(!groups[key]) groups[key]=[]; groups[key].push(i);} Object.keys(groups).forEach(k=>pushRow(k, groups[k])); }
+    function groupRows(sim){
+      const mode=gi('selTableView')?.value||'month';
+      const rows=[];
+      const pushRow=(key,idxs)=>{
+        const lastIdx=idxs[idxs.length-1];
+        const sum=(arr)=>idxs.reduce((a,i)=>a+(arr[i]||0),0);
+        rows.push({
+          key,
+          inleg: sum(sim.arrInlegTotal),
+          inlegDuo: sum(sim.arrInlegDuo),
+          inlegOwn: sum(sim.arrInlegOwn),
+          pay: sum(sim.arrPay),
+          external: sum(sim.arrExternalPay),
+          rente: sum(sim.arrInt),
+          schuld: sim.arrDebt[lastIdx],
+          port: sim.arrPort[lastIdx],
+          saldo: sim.arrNet[lastIdx]
+        });
+      };
+      if (mode==='month'){
+        for (let i=0;i<sim.labels.length;i++) pushRow(sim.labels[i],[i]);
+      } else if (mode==='quarter'){
+        const groups={};
+        for (let i=0;i<sim.labels.length;i++){
+          const d=addMonths(new Date(gi('inpStart')?.value||Date.now()), i);
+          const q=Math.floor(d.getMonth()/3)+1; const key=`${d.getFullYear()} Q${q}`;
+          if(!groups[key]) groups[key]=[]; groups[key].push(i);
+        }
+        Object.keys(groups).forEach(k=>pushRow(k, groups[k]));
+      } else {
+        const groups={};
+        for (let i=0;i<sim.labels.length;i++){
+          const d=addMonths(new Date(gi('inpStart')?.value||Date.now()), i);
+          const key=`${d.getFullYear()}`;
+          if(!groups[key]) groups[key]=[]; groups[key].push(i);
+        }
+        Object.keys(groups).forEach(k=>pushRow(k, groups[k]));
+      }
       return rows; }
+
+
+    // ===== Render table =====
+    function renderTable(sim){
+      const tbody=document.querySelector('#tbl tbody'); if(!tbody) return;
+      const rows=groupRows(sim);
+      tbody.innerHTML=rows.map(r=>`<tr>
+        <td>${r.key}</td>
+        <td>${euro2(r.inleg)}</td>
+        <td>${euro2(r.inlegDuo)}</td>
+        <td>${euro2(r.inlegOwn)}</td>
+        <td>${euro2(r.pay)}</td>
+        <td>${euro2(r.external)}</td>
+        <td>${euro2(r.rente)}</td>
+        <td>${euro2(r.schuld)}</td>
+        <td>${euro2(r.port)}</td>
+        <td>${euro2(r.saldo)}</td>
+      </tr>`).join('');
+    }
 
     // ===== Chart =====
     let chart;
@@ -391,9 +472,7 @@
     }
     const applyChartTheme=()=>{ if(!chart) return; const d=chart.data.datasets; d[0].borderColor=getCSS('--line-portfolio'); d[1].borderColor=getCSS('--line-netto'); d[2].borderColor=getCSS('--line-debt'); chart.update('none'); };
 
-    // ===== Renderers =====
-    function renderTable(sim){ const tbody=document.querySelector('#tbl tbody'); if(!tbody) return; const rows=groupRows(sim); tbody.innerHTML=rows.map(r=>`<tr><td>${r.key}</td><td>${euro2(r.inleg)}</td><td>${euro2(r.inlegOwn)}</td><td>${euro2(r.pay)}</td><td>${euro2(r.external)}</td><td>${euro2(r.rente)}</td><td>${euro2(r.schuld)}</td><td>${euro2(r.port)}</td><td>${euro2(r.saldo)}</td></tr>`).join(''); }
-
+    // ===== Update/render =====
     function update(){
       // Outputs naast sliders
       setText('repayYearsOut', `${gi('inpRepayYears')?.value||''} jaar`);
@@ -461,7 +540,7 @@
       wireToggleInput('tglFX','tglFXWrap', update);
       wireToggleInput('tglDark','tglDarkWrap', ()=>{ applyChartTheme(); update(); });
       wireChartToggle('togNet','wrapNet'); wireChartToggle('togPort','wrapPort'); wireChartToggle('togDebt','wrapDebt');
-      const btn=gi('btnReset'); if(btn){ btn.addEventListener('click', (e)=>{ e.preventDefault(); setDefaultDates(); const set=(id,val)=>{ const el=gi(id); if(el) el.value=val; }; set('inpAmount',724); set('inpLoanAPR',2.57); const sr=gi('selReturn'); if(sr) sr.value='8'; set('inpCustomReturn',''); set('inpRepayYears',35); set('inpInvestYears',35); setText('repayYearsOut','35 jaar'); setText('investYearsOut','35 jaar'); set('inpOwn',0); const of=gi('selOwnFreq'); if(of) of.value='monthly'; set('inpInflAPR',2.1); set('inpFXAPR',0); const ck=(id,val)=>{ const el=gi(id); if(el){ el.checked=val; el.dispatchEvent(new Event('change')); } }; ck('tglPay',false); ck('tglInfl',false); ck('tglFX',false); ck('tglDark',true); ck('togNet',true); ck('togPort',true); ck('togDebt',false); update(); }); }
+      const btn=gi('btnReset'); if(btn){ btn.addEventListener('click', (e)=>{ e.preventDefault(); setDefaultDates(); const set=(id,val)=>{ const el=gi(id); if(el) el.value=val; }; set('inpAmount',724); set('inpLoanAPR',2.57); const sr=gi('selReturn'); if(sr) sr.value='8'; set('inpCustomReturn',''); set('inpRepayYears',35); set('inpInvestYears',35); setText('repayYearsOut','35 jaar'); setText('investYearsOut','35 jaar'); set('inpOwn',0); const of=gi('selOwnFreq'); if(of) of.value='monthly'; set('inpInflAPR',2.1); set('inpFXAPR',0); const ck=(id,val)=>{ const el=gi(id); if(el){ el.checked=val; el.dispatchEvent(new Event('change')); } }; ck('tglPay',false); ck('tglInfl',false); ck('tglFX',false); ck('tglDark',true); ck('togNet',false); ck('togPort',true); ck('togDebt',false); update(); }); }
     }
 
     function selfTests(){
@@ -473,7 +552,7 @@
         // Logic tests
         console.assert(monthsBetween(new Date('2024-01-24'), new Date('2024-02-24')) === 1, 'monthsBetween 1m');
         console.assert(monthsInclusive(new Date('2024-01-24'), new Date('2024-03-24')) === 3, 'monthsInclusive 3m');
-        const cfg = {$1fxOn:true, fxTotal: 0.01 };
+        const cfg = { amount:724, start:new Date('2024-08-24'), end:new Date('2026-07-24'), loanAPR:0.0257, expAPR:0.08, repayYears:35, investYears:35, ownAmount:0, ownFreq:'monthly', payFromPortfolio:false, inflOn:false, inflAPR:0.021, fxOn:true, fxTotal:0.01, tableView:'month' };
         const out = simulate(cfg);
         const outR = deflateView(out, 0.02);
         console.assert(outR.arrPort[10] <= out.arrPort[10], 'deflation lowers nominal');
@@ -487,9 +566,14 @@
     document.addEventListener('DOMContentLoaded', ()=>{
       setDefaultDates();
       wireInputs();
-      // In sommige omgevingen is Chart pas na defer beschikbaar; kleine delay voor zekerheid
+      // Zorg dat defaults kloppen: donker aan, alleen Portefeuille aan
+      const ck=(id,val)=>{ const el=gi(id); if(el){ el.checked=val; el.dispatchEvent(new Event('change')); } };
+      ck('tglDark',true); ck('togPort',true); ck('togNet',false); ck('togDebt',false);
       setTimeout(()=>{ ensureChart(); update(); selfTests(); }, 0);
     });
   </script>
+<script>/* enforce default series on first load */
+window.addEventListener('load',()=>{const ck=(id,val)=>{const el=document.getElementById(id); if(el){ el.checked=val; el.dispatchEvent(new Event('change')); }}; ck('togNet',false); ck('togPort',true); ck('togDebt',false);});
+</script>
 </body>
 </html>
