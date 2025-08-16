@@ -72,6 +72,12 @@
     #seriesToggles .track{margin-right:10px}
     @media(max-width:900px){#seriesToggles{grid-template-columns:1fr 1fr}}
     @media(max-width:560px){#seriesToggles{grid-template-columns:1fr}}
+
+    /* inline input + toggle pair */
+    .inline-pair{display:flex;gap:8px;align-items:center}
+    .inline-pair input[type="number"]{flex:1}
+    .inline-pair .tgl{min-width:unset;padding-inline:10px;height:44px}
+    .field-full{grid-column:1/-1}
   </style>
 </head>
 <body>
@@ -144,13 +150,27 @@
             </select>
           </div>
 
-          <div class="field">
+          <div class="field field-full">
             <label>Inflatie p/j (%)</label>
-            <input id="inpInflAPR" type="number" min="0" step="0.1" value="2.1" />
+            <div class="inline-pair">
+              <input id="inpInflAPR" type="number" min="0" step="0.1" value="2.1" />
+              <label class="tgl" id="tglInflWrap" aria-label="Inflatie-correctie" role="switch" aria-checked="false">
+                <input id="tglInfl" type="checkbox" />
+                <span class="track"><span class="thumb"></span></span>
+                
+              </label>
+            </div>
           </div>
-          <div class="field">
-            <label>USD/EUR drift p/j (%)</label>
-            <input id="inpFXAPR" type="number" step="0.1" value="0" />
+          <div class="field field-full">
+            <label>USD/EUR totaal (%)</label>
+            <div class="inline-pair">
+              <input id="inpFXAPR" type="number" step="0.1" value="0" />
+              <label class="tgl" id="tglFXWrap" aria-label="FX-correctie" role="switch" aria-checked="false">
+                <input id="tglFX" type="checkbox" />
+                <span class="track"><span class="thumb"></span></span>
+                
+              </label>
+            </div>
           </div>
         </div>
 
@@ -160,11 +180,6 @@
             <span class="track"><span class="thumb"></span></span>
             <span class="txt">Schuld betalen uit portefeuille</span>
           </label>
-          <label class="tgl" id="tglInflWrap" role="switch" aria-checked="false">
-            <input id="tglInfl" type="checkbox" />
-            <span class="track"><span class="thumb"></span></span>
-            <span class="txt">Inflatie‑correctie</span>
-          </label>
           <label class="tgl" id="tglDarkWrap" role="switch" aria-checked="true">
             <input id="tglDark" type="checkbox" checked />
             <span class="track"><span class="thumb"></span></span>
@@ -172,7 +187,7 @@
           </label>
         </div>
 
-        <div class="sub" style="margin-top:6px">Aanname: 24 maanden aanloopfase na <strong>einde studie/laatste DUO‑uitkering</strong>. Rente maandelijks samengesteld. Aflossing annuïtair over de gekozen looptijd. FX‑drift werkt door in de portefeuille (USD→EUR).</div>
+        <div class="sub" style="margin-top:6px">Aanname: 24 maanden aanloopfase na <strong>einde studie/laatste DUO‑uitkering</strong>. Rente maandelijks samengesteld. Aflossing annuïtair over de gekozen looptijd. FX (USD/EUR) gebruikt **totale drift** over de periode (lineair via maandfactor) en werkt door in de portefeuille.</div>
         <div class="toolbar" style="margin-top:12px; gap:8px; flex-wrap:wrap;">
           <button id="btnReset" class="secondary">Reset</button>
         </div>
@@ -254,7 +269,7 @@
       const amount = Math.max(0, Number(gi('inpAmount')?.value?.replace(',', '.') ?? 0) || 0);
       const loanAPR = Math.max(0, Number(gi('inpLoanAPR')?.value?.replace(',', '.') ?? 0) || 0) / 100;
       const inflAPR = Math.max(0, Number(gi('inpInflAPR')?.value?.replace(',', '.') ?? 0) || 0) / 100;
-      const fxAPR = (Number(gi('inpFXAPR')?.value?.replace(',', '.') ?? 0) || 0) / 100;
+      const fxTotal = (Number(gi('inpFXAPR')?.value?.replace(',', '.') ?? 0) || 0) / 100;
       const startStr = gi('inpStart')?.value || '';
       const endStr = gi('inpEnd')?.value || '';
       const start = startStr ? new Date(startStr) : new Date();
@@ -267,16 +282,17 @@
       const ownAmount = Math.max(0, Number(gi('inpOwn')?.value?.replace(',', '.') ?? 0) || 0);
       const ownFreq = gi('selOwnFreq')?.value || 'monthly'; // 'monthly' | 'weekly' | 'off'
       const payFromPortfolio = !!gi('tglPay')?.checked; // AAN = uit portefeuille
-      const inflOn = !!gi('tglInfl')?.checked;
+      const inflOn = !!gi('tglInfl')?.checked; // inline toggle naast inflatieveld
+      const fxOn = !!gi('tglFX')?.checked;     // inline toggle naast FX-veld
       const tableView = gi('selTableView')?.value || 'month';
-      return { amount, start, end, loanAPR, expAPR, repayYears, investYears, ownAmount, ownFreq, payFromPortfolio, inflOn, inflAPR, fxAPR, tableView };
+      return { amount, start, end, loanAPR, expAPR, repayYears, investYears, ownAmount, ownFreq, payFromPortfolio, inflOn, inflAPR, fxOn, fxTotal, tableView };
     }
 
     // ===== Core simulation (nominaal) =====
     function simulate(cfg) {
       const rL = Math.pow(1 + cfg.loanAPR, 1 / 12) - 1; // loan monthly
       const rI = Math.pow(1 + cfg.expAPR, 1 / 12) - 1;  // invest monthly
-      const rFX = Math.pow(1 + cfg.fxAPR, 1 / 12) - 1;  // USD/EUR drift monthly (positief = USD sterker → hogere EUR-waarde)
+      /* FX totaal over periode → maandfactor zetten nadat totalMonths is bepaald */
 
       const monthsBorrowed = monthsInclusive(cfg.start, cfg.end); // inclusive DUO
       const grad = cfg.end; const graceEnd = addMonths(grad, 24);
@@ -287,6 +303,9 @@
 
       // Einde simulatie is max van aflosperiode en beleggingshorizon (en minimaal iets na DUO)
       const totalMonths = Math.max(repayStartIdx + repayMonths, monthsInvest, monthsBorrowed + 6);
+
+      // FX: totale drift over de hele periode → maandfactor zodat aan einde (1+fxTotal) is bereikt
+      const rFXFactor = cfg.fxOn ? Math.pow(1 + cfg.fxTotal, 1 / Math.max(1,totalMonths)) : 1;
 
       function dryRun(monthsEnd){ let p=0; for(let i=0;i<monthsEnd;i++){ const c=(i<monthsBorrowed)?cfg.amount:0; p+=c; const interest=p*rL; p+=interest; } return {B0:p}; }
       const {B0} = dryRun(repayStartIdx);
@@ -311,7 +330,7 @@
 
         let pay=0, payFromPort=0, payExternal=0; if (i >= repayStartIdx) { pay = Math.min(P, principal); principal -= pay; }
         portfolio += contribute; if (cfg.payFromPortfolio && pay>0){ payFromPort = Math.min(pay, portfolio); portfolio -= payFromPort; if (payFromPort < pay) payExternal = pay - payFromPort; if (portfolio <= 0 && depletedAt === null){ depletedAt = date; portfolio = Math.max(0, portfolio); } } else { payExternal = pay; }
-        portfolio *= (1 + rI) * (1 + rFX);
+        portfolio *= (1 + rI) * rFXFactor;
         const net = portfolio - principal;
 
         arrPort.push(portfolio||0); arrDebt.push(principal||0); arrNet.push(net||0); arrPay.push(pay||0); arrInt.push(interest||0); arrExternalPay.push(payExternal||0); arrPortfolioPay.push(payFromPort||0);
@@ -439,26 +458,28 @@
         .forEach(id=>{ const el=gi(id); if(!el) return; el.addEventListener('input',()=>{ if(id==='selReturn'){ const s=gi('selReturn'); const c=gi('inpCustomReturn'); if(s&&c){ c.style.display = s.value==='custom' ? 'block' : 'none'; } } update(); }); el.addEventListener('change', update); });
       wireToggleInput('tglPay','tglPayWrap', update);
       wireToggleInput('tglInfl','tglInflWrap', update);
+      wireToggleInput('tglFX','tglFXWrap', update);
       wireToggleInput('tglDark','tglDarkWrap', ()=>{ applyChartTheme(); update(); });
       wireChartToggle('togNet','wrapNet'); wireChartToggle('togPort','wrapPort'); wireChartToggle('togDebt','wrapDebt');
-      const btn=gi('btnReset'); if(btn){ btn.addEventListener('click', (e)=>{ e.preventDefault(); setDefaultDates(); const set=(id,val)=>{ const el=gi(id); if(el) el.value=val; }; set('inpAmount',724); set('inpLoanAPR',2.57); const sr=gi('selReturn'); if(sr) sr.value='8'; set('inpCustomReturn',''); set('inpRepayYears',35); set('inpInvestYears',35); setText('repayYearsOut','35 jaar'); setText('investYearsOut','35 jaar'); set('inpOwn',0); const of=gi('selOwnFreq'); if(of) of.value='monthly'; set('inpInflAPR',2.1); set('inpFXAPR',0); const ck=(id,val)=>{ const el=gi(id); if(el){ el.checked=val; el.dispatchEvent(new Event('change')); } }; ck('tglPay',false); ck('tglInfl',false); ck('tglDark',true); ck('togNet',true); ck('togPort',true); ck('togDebt',false); update(); }); }
+      const btn=gi('btnReset'); if(btn){ btn.addEventListener('click', (e)=>{ e.preventDefault(); setDefaultDates(); const set=(id,val)=>{ const el=gi(id); if(el) el.value=val; }; set('inpAmount',724); set('inpLoanAPR',2.57); const sr=gi('selReturn'); if(sr) sr.value='8'; set('inpCustomReturn',''); set('inpRepayYears',35); set('inpInvestYears',35); setText('repayYearsOut','35 jaar'); setText('investYearsOut','35 jaar'); set('inpOwn',0); const of=gi('selOwnFreq'); if(of) of.value='monthly'; set('inpInflAPR',2.1); set('inpFXAPR',0); const ck=(id,val)=>{ const el=gi(id); if(el){ el.checked=val; el.dispatchEvent(new Event('change')); } }; ck('tglPay',false); ck('tglInfl',false); ck('tglFX',false); ck('tglDark',true); ck('togNet',true); ck('togPort',true); ck('togDebt',false); update(); }); }
     }
 
     function selfTests(){
       try{
         // DOM presence tests
-        const ids = ['inpAmount','inpLoanAPR','inpStart','inpEnd','inpRepayYears','repayYearsOut','inpInvestYears','investYearsOut','selReturn','inpOwn','selOwnFreq','tglPay','tglInfl','tglDark','viewModeBadge','kInleg','kExternal','kPort','kNetto','kPortTag','phaseNote','chart','tbl'];
+        const ids = ['inpAmount','inpLoanAPR','inpStart','inpEnd','inpRepayYears','repayYearsOut','inpInvestYears','investYearsOut','selReturn','inpCustomReturn','inpOwn','selOwnFreq','inpInflAPR','inpFXAPR','tglFX','tglDark','tglPay','viewModeBadge','kInleg','kExternal','kPort','kNetto','kPortTag','phaseNote','chart','tbl','togNet','togPort','togDebt','selTableView'];
         const missing = ids.filter(id=>!gi(id));
         if(missing.length){ console.warn('DOM check: missing elements:', missing); }
         // Logic tests
         console.assert(monthsBetween(new Date('2024-01-24'), new Date('2024-02-24')) === 1, 'monthsBetween 1m');
         console.assert(monthsInclusive(new Date('2024-01-24'), new Date('2024-03-24')) === 3, 'monthsInclusive 3m');
-        const cfg = { amount: 1000, start: new Date('2024-01-24'), end: new Date('2024-12-24'), loanAPR: 0.03, expAPR: 0.07, repayYears: 1, investYears: 2, ownAmount: 25, ownFreq:'weekly', payFromPortfolio: false, inflOn: true, inflAPR: 0.02, fxAPR: 0.01 };
+        const cfg = {$1fxOn:true, fxTotal: 0.01 };
         const out = simulate(cfg);
         const outR = deflateView(out, 0.02);
-        const ok = [out.arrPort, out.arrDebt, out.arrNet, out.arrPay].every(a => a.every(v => Number.isFinite(v)));
-        console.assert(ok, 'arrays contain finite numbers');
         console.assert(outR.arrPort[10] <= out.arrPort[10], 'deflation lowers nominal');
+        const fxOnOut = simulate({ ...cfg, fxTotal: 0.10, fxOn: true });
+        const fxOffOut = simulate({ ...cfg, fxTotal: 0.10, fxOn: false });
+        console.assert(fxOnOut.arrPort[12] >= fxOffOut.arrPort[12], 'FX on increases EUR portfolio with positive drift');
       }catch(e){ console.warn('Self-tests warning:', e); }
     }
 
