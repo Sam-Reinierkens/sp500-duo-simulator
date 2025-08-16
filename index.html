@@ -334,7 +334,7 @@
       gi('kPortTag').textContent=!cfg.payFromPortfolio?'Aflossingen extern betaald':(out.meta.depletedAt?`Aflossingen uit portefeuille • leeg in ${out.meta.depletedAt.getFullYear()}-${String(out.meta.depletedAt.getMonth()+1).padStart(2,'0')}`:'Aflossingen uit portefeuille');
 
       const fmt=(d)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-      gi('phaseNote').innerHTML=`Einde studie/laatste uitkering: <strong>${fmt(out.meta.grad)}</strong> • Aanloopfase tot: <strong>${fmt(out.meta.graceEnd)}</strong> • Start aflossen: <strong>${fmt(out.meta.repayStartDate)}</strong> • Einde aflossen: <strong>${fmt(out.meta.repayEndDate)}</strong> • <em>Beleggingshorizon eindigt</em>: <strong>${fmt(out.meta.investEndDate)}</strong>`;
+      gi('phaseNote').innerHTML = `Einde studie/laatste uitkering: <strong>${fmt(out.meta.grad)}</strong> • Aanloopfase tot: <strong>${fmt(out.meta.graceEnd)}</strong> • Start aflossen: <strong>${fmt(out.meta.repayStartDate)}</strong> • Maandtermijn DUO: <strong>${euro2(out.meta.monthlyPayment)}</strong> • Einde aflossen: <strong>${fmt(out.meta.repayEndDate)}</strong> • <em>Beleggingshorizon eindigt</em>: <strong>${fmt(out.meta.investEndDate)}</strong>`;
 
       renderTable(cfg, out);
 
