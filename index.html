@@ -10,7 +10,7 @@
     :root{
       --bg:#0f1420; --panel:rgba(255,255,255,.06); --text:#e9edf3; --muted:#9fb1c7;
       --accent:#6ea8fe; --accent2:#60d394; --shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
-      --radius:12px; --radius-input:12px; --chip-w:210px; --period-col:116px;
+      --radius:12px; --radius-input:12px; --chip-w:210px;
       --line-portfolio:#60d394; --line-netto:#8ab4ff; --line-debt:#ff7b7b;
       --thead-bg: color-mix(in oklab, var(--bg), white 6%);
       --firstcol-bg: color-mix(in oklab, var(--bg), white 4%);
@@ -37,9 +37,11 @@
     @media(max-width:980px){.grid{grid-template-columns:1fr}}
     .card{background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;overflow:hidden}
     .card-settings{overflow:visible}
-    .card h2{margin:0;font-size:1.05rem}
-    .section-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
-    .badge{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--muted);font-size:.85rem;line-height:1}
+    .card h2{margin:0 0 10px;font-size:1.05rem}
+
+    /* NEW: Shared header row for cards (more space above widgets/tables) */
+    .card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+    .badge{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--muted);font-size:.85rem;line-height:1;position:relative;top:-1px}
     .badge.on{color:#fff;border-color:color-mix(in oklab,var(--accent),#fff 10%);background:color-mix(in oklab,var(--accent),transparent 85%)}
 
     .controls{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;align-items:start}
@@ -75,7 +77,8 @@
     table{width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
     td,th{padding:10px;border-bottom:1px dashed rgba(255,255,255,.08);text-align:right;background:transparent}
     thead th{color:var(--muted);font-weight:600;position:sticky;top:0;z-index:3;background:var(--thead-bg);backdrop-filter:saturate(130%) blur(4px);box-shadow:inset 0 -1px 0 rgba(255,255,255,.08)}
-    th:first-child,td:first-child{position:sticky;left:0;z-index:2;background:var(--firstcol-bg);text-align:left;min-width:var(--period-col)}
+    /* NEW: a bit narrower first column so dates fit tightly */
+    th:first-child,td:first-child{position:sticky;left:0;z-index:2;background:var(--firstcol-bg);text-align:left;min-width:120px}
     thead th:first-child{z-index:4}
 
     /* 3-op-een-rij serie-toggles boven de grafiek */
@@ -90,6 +93,7 @@
     .inline-pair .tgl{min-width:unset;padding-inline:10px;height:44px}
     .field-full{grid-column:1/-1}
 
+    /* NEW: header row above table — give it a little bottom margin so it doesn't touch the table */
     .table-head{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:10px}
   </style>
 </head>
@@ -112,7 +116,7 @@
             <input id="inpAmount" type="number" min="0" step="1" value="724" />
           </div>
           <div class="field">
-            <label>DUO‑rente per jaar (%)</label>
+            <label>DUO-rente per jaar (%)</label>
             <input id="inpLoanAPR" type="number" min="0" step="0.01" value="2.57" />
           </div>
           <div class="field">
@@ -120,7 +124,7 @@
             <input id="inpStart" type="date" />
           </div>
           <div class="field">
-            <label>Einde studie / laatste DUO‑uitkering</label>
+            <label>Einde studie / laatste DUO-uitkering</label>
             <input id="inpEnd" type="date" />
           </div>
 
@@ -137,7 +141,7 @@
           </div>
 
           <div class="field">
-            <label>Verwacht S&P500‑rendement p/j (%)</label>
+            <label>Verwacht S&P500-rendement p/j (%)</label>
             <select id="selReturn">
               <option value="6">6%</option>
               <option value="8" selected>8%</option>
@@ -201,7 +205,7 @@
         </div>
 
         <div class="sub" style="margin-top:6px">
-          Aanname: 24 maanden aanloopfase na <strong>einde studie/laatste DUO‑uitkering</strong>. Rente maandelijks samengesteld. Aflossing annuïtair over de gekozen looptijd.
+          Aanname: 24 maanden aanloopfase na <strong>einde studie/laatste DUO-uitkering</strong>. Rente maandelijks samengesteld. Aflossing annuïtair over de gekozen looptijd.
         </div>
         <div class="toolbar" style="margin-top:12px; gap:8px; flex-wrap:wrap; display:flex;">
           <button id="btnReset" class="secondary">Reset</button>
@@ -210,15 +214,15 @@
 
       <!-- SIMULATIE -->
       <section class="card">
-        <div class="section-head">
-          <h2>Simulatie</h2>
+        <div class="card-head">
+          <h2 style="margin:0">Simulatie</h2>
           <span id="viewModeBadge" class="badge">Nominaal</span>
         </div>
         <div class="kpis">
-          <div class="kpi"><div class="label">Totale inleg</div><div class="value" id="kInleg">€ 0</div><div class="tag" id="kMonths">—</div></div>
-          <div class="kpi"><div class="label">Totale extern betaalde DUO</div><div class="value" id="kExternal">€ 0</div><div class="tag">Aflossingen buiten portefeuille</div></div>
-          <div class="kpi"><div class="label">Eindwaarde portefeuille</div><div class="value" id="kPort">€ 0</div><div class="tag" id="kPortTag">—</div></div>
-          <div class="kpi"><div class="label">Netto resultaat</div><div class="value" id="kNetto">€ 0</div><div class="tag">≈ Eindportefeuille – extern betaalde DUO</div></div>
+          <div class="kpi"><div class="label">Totale inleg</div><div class="value" id="kInleg">€ 0</div><div class="tag" id="kMonths">—</div></div>
+          <div class="kpi"><div class="label">Totale extern betaalde DUO</div><div class="value" id="kExternal">€ 0</div><div class="tag">Aflossingen buiten portefeuille</div></div>
+          <div class="kpi"><div class="label">Eindwaarde portefeuille</div><div class="value" id="kPort">€ 0</div><div class="tag" id="kPortTag">—</div></div>
+          <div class="kpi"><div class="label">Netto resultaat</div><div class="value" id="kNetto">€ 0</div><div class="tag">≈ Eindportefeuille – extern betaalde DUO</div></div>
         </div>
 
         <div class="toggles" id="seriesToggles">
@@ -248,9 +252,9 @@
         <table id="tbl">
           <thead>
             <tr>
-              <th style="min-width:var(--period-col)">Periode</th>
+              <th>Periode</th>
               <th>Totale inleg (€)</th>
-              <th>DUO‑inleg (€)</th>
+              <th>DUO-inleg (€)</th>
               <th>Eigen inleg (€)</th>
               <th>Aflossing DUO (€)</th>
               <th>Extern betaald (€)</th>
@@ -313,22 +317,20 @@
       const repayStartDate = addMonths(graceEnd, 1);
       const repayStartIdx = monthsBetween(cfg.start, repayStartDate);
       const repayMonths = cfg.repayYears * 12;
-      const monthsInvest = cfg.investYears * 12; // looptijd beleggen vanaf 1e inleg (start)
+      const monthsInvest = cfg.investYears * 12; // looptijd beleggen
 
       // Simulatieduur = beleggingshorizon
       const totalMonths = monthsInvest;
 
-      // Bepaal schuld op start aflossen (B0) via dry-run op alleen de lening
+      // Schuld op start aflossen (B0)
       let principalDry = 0; for(let i=0;i<repayStartIdx;i++){ const c=(i<monthsBorrowed)?cfg.amount:0; principalDry += c; principalDry += principalDry * rL; }
       const B0 = principalDry;
       const r = rL, N = repayMonths; const P = (N>0) ? (r>0 ? B0 * (r / (1 - Math.pow(1+r, -N))) : (B0 / N)) : 0; // annuïteit
 
-      // Eigen inleg per maand
       const ownMonthly = (cfg.ownFreq==='monthly') ? cfg.ownAmount : (cfg.ownFreq==='weekly' ? cfg.ownAmount * (52/12) : 0);
 
-      // State (gescheiden)
       let principal=0; // schuld
-      let portD=0, portO=0; // portefeuille: DUO- en Eigen-deel
+      let portD=0, portO=0; // DUO- en Eigen-deel
       let totalInterest=0, totalInleg=0, totalDUOInleg=0, totalOwnInleg=0;
       const labels=[], arrPort=[], arrDebt=[], arrNet=[], arrPay=[], arrInt=[], arrExternalPay=[], arrPortfolioPay=[], arrInlegDuo=[], arrInlegOwn=[], arrInlegTotal=[];
       let depletedAt=null;
@@ -336,21 +338,18 @@
       for (let i=0;i<totalMonths;i++){
         const date = addMonths(cfg.start, i); labels.push(`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`);
 
-        // Inleg
         const cDuo = (i < monthsBorrowed) ? cfg.amount : 0;
         const cOwn = (i < monthsInvest) ? ownMonthly : 0;
         portD += cDuo; portO += cOwn;
         totalDUOInleg += cDuo; totalOwnInleg += cOwn; totalInleg += (cDuo + cOwn);
         arrInlegDuo.push(cDuo); arrInlegOwn.push(cOwn); arrInlegTotal.push(cDuo + cOwn);
 
-        // Schuld groeit met rente; annuïtair aflossen vanaf repayStartIdx
-        principal += cDuo; // DUO-inleg vergroot de schuld (eigen inleg niet)
+        principal += cDuo;
         const interest = principal * rL; principal += interest; totalInterest += interest; arrInt.push(interest);
 
         let pay=0, payFromPort=0, payExternal=0;
         if (i >= repayStartIdx) { pay = Math.min(P, principal); principal -= pay; }
 
-        // Betalen uit portefeuille? Haal proportioneel uit DUO- en Eigen-deel
         const portTotalBefore = portD + portO;
         if (cfg.payFromPortfolio && pay>0 && portTotalBefore>0){
           payFromPort = Math.min(pay, portTotalBefore);
@@ -362,7 +361,6 @@
           payExternal = pay;
         }
 
-        // Groei aan het einde van de maand (nominaal, zonder FX)
         portD *= (1 + rI); portO *= (1 + rI);
 
         const portTotal = portD + portO;
@@ -371,13 +369,12 @@
         arrPay.push(pay||0); arrExternalPay.push(payExternal||0); arrPortfolioPay.push(payFromPort||0);
       }
 
-      // FX achteraf (constante factor over de hele serie)
+      // FX achteraf
       if (cfg.fxOn && cfg.fxTotal !== 0){
         const f = 1 + cfg.fxTotal;
         for (let i=0;i<arrPort.length;i++){ arrPort[i]*=f; arrNet[i]*=f; }
       }
 
-      // Resultaten (nominaal)
       const endPortfolio = arrPort[arrPort.length-1] || 0; 
       const endDebt = arrDebt[arrDebt.length-1] || 0;
       const totalPaid = arrPay.reduce((a,b)=>a+b,0);
@@ -389,7 +386,7 @@
         meta: { grad, repayStartDate, graceEnd, monthlyPayment: P, depletedAt, repayEndDate: addMonths(repayStartDate, repayMonths), investEndDate: addMonths(cfg.start, monthsInvest) } };
     }
 
-    // ===== Deflatie helper (reële weergave – NA FX) =====
+    // ===== Deflatie helper =====
     function deflateView(sim, inflAPR){
       const rInf = Math.pow(1 + inflAPR, 1/12) - 1;
       const df = (i) => 1 / Math.pow(1 + rInf, i);
@@ -472,10 +469,9 @@
       setText('investYearsOut', `${gi('inpInvestYears')?.value||''} jaar`);
 
       const cfg=getInputs();
-      const simNomFX = simulate(cfg);               // eerst rekenen (nominaal), dan FX al toegepast binnen simulate()
-      const sim = cfg.inflOn ? deflateView(simNomFX, cfg.inflAPR) : simNomFX; // inflatie als reële weergave achteraf
+      const simNomFX = simulate(cfg);
+      const sim = cfg.inflOn ? deflateView(simNomFX, cfg.inflAPR) : simNomFX;
 
-      // KPI's
       const last = sim.labels.length - 1;
       const sum = (a)=>a.reduce((x,y)=>x+y,0);
       const totalInleg = sum(sim.arrInlegTotal);
@@ -502,13 +498,12 @@
 
       renderTable(sim);
 
-      // Chart
       const ch = ensureChart();
       if (ch){
         ch.data.labels = sim.labels;
         ch.data.datasets[0].data = sim.arrPort;
         ch.data.datasets[1].data = sim.arrNet;
-        ch.data.datasets[2].data = sim.arrDebt.map(v=>-v); // schuld onder nul
+        ch.data.datasets[2].data = sim.arrDebt.map(v=>-v);
 
         ch.data.datasets[0].hidden = !gi('togPort')?.checked;
         ch.data.datasets[1].hidden = !gi('togNet')?.checked;
@@ -547,7 +542,6 @@
       }catch(e){ console.warn('Self-tests warning:', e); }
     }
 
-    // Boot
     document.addEventListener('DOMContentLoaded', ()=>{
       setDefaultDates();
       wireInputs();
