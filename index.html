@@ -10,10 +10,8 @@
     :root{
       --bg:#0f1420; --panel:rgba(255,255,255,.06); --text:#e9edf3; --muted:#9fb1c7;
       --accent:#6ea8fe; --accent2:#60d394; --shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
-      --radius:10px; --radius-input:12px; --chip-w:210px; /* bredere toggles */
-      --line-portfolio:#60d394; --line-netto:#8ab4ff; --line-debt:#ff7b7b;
-      --thead-bg: color-mix(in oklab, var(--bg), white 6%);
-      --firstcol-bg: color-mix(in oklab, var(--bg), white 4%);
+      --radius:10px; --radius-input:12px; --chip-w:210px;
+      --line-portfolio:#60d394; --line-netto:#8ab4ff; --line-debt:#ff7b7b; --thead-bg: color-mix(in oklab, var(--bg), white 6%); --firstcol-bg: color-mix(in oklab, var(--bg), white 4%);
     }
     body.light{ --bg:#f4f7fb; --panel:rgba(0,0,0,.04); --text:#0d1117; --muted:#4b5563; --accent:#2563eb; --accent2:#16a34a; --line-portfolio:#16a34a; --line-netto:#2563eb; --line-debt:#ef4444; --thead-bg:color-mix(in oklab, var(--bg), black 4%); --firstcol-bg:color-mix(in oklab, var(--bg), black 2%); }
     *{box-sizing:border-box}
@@ -27,6 +25,7 @@
     .grid{display:grid;gap:16px;grid-template-columns:minmax(360px,1fr) minmax(720px,1.6fr)}
     @media(max-width:980px){.grid{grid-template-columns:1fr}}
     .card{background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;overflow:hidden}
+    .card-settings{overflow:visible}
     .card h2{margin:0 0 10px;font-size:1.05rem}
 
     .controls{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;align-items:start}
@@ -34,12 +33,14 @@
     .field label{font-size:.9rem;color:var(--muted);line-height:1.2}
     input[type="number"],input[type="date"],select{height:44px;border-radius:var(--radius-input);border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:var(--text);padding:0 12px;outline:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.03);font-variant-numeric:tabular-nums}
 
-    .row-slider{grid-column:1/-1;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+    .row-slider{grid-column:1/-1;display:grid;grid-template-columns:auto 1fr 80px;gap:12px;align-items:center}
     input[type="range"]{height:36px;accent-color:var(--accent)}
-    .slider-val{font-variant-numeric:tabular-nums;color:var(--muted);min-width:64px;text-align:right}.toggles{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:8px 0;justify-content:flex-start}
-    .tgl{display:inline-flex;gap:10px;align-items:center;user-select:none;cursor:pointer;padding:6px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);height:44px;min-width:var(--chip-w);justify-content:center}
+    .slider-val{font-variant-numeric:tabular-nums;color:var(--muted);min-width:64px;text-align:right}
+
+    .toggles{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:8px 0;justify-content:flex-start}
+    .tgl{display:inline-flex;gap:10px;align-items:center;user-select:none;cursor:pointer;padding:6px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);height:44px;min-width:var(--chip-w);justify-content:flex-start}
     .tgl input{position:absolute;opacity:0;width:1px;height:1px}
-    .tgl .track{position:relative;width:60px;height:28px;border-radius:999px;background:rgba(255,255,255,.14);box-shadow:inset 0 1px 2px rgba(0,0,0,.25);transition:background .2s;flex:0 0 60px}
+    .tgl .track{position:relative;width:60px;height:28px;border-radius:999px;background:rgba(255,255,255,.14);box-shadow:inset 0 1px 2px rgba(0,0,0,.25);transition:background .2s;flex:0 0 60px;margin-right:10px}
     .tgl .thumb{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#d1d5db;transition:transform .2s ease;box-shadow:0 2px 6px rgba(0,0,0,.4)}
     .tgl input:checked + .track{background:color-mix(in oklab,var(--accent),white 8%)}
     .tgl input:checked + .track .thumb{transform:translateX(32px);background:#fff}
@@ -62,9 +63,10 @@
     thead th{color:var(--muted);font-weight:600;position:sticky;top:0;z-index:3;background:var(--thead-bg);backdrop-filter:saturate(130%) blur(4px);box-shadow:inset 0 -1px 0 rgba(255,255,255,.08)}
     th:first-child,td:first-child{position:sticky;left:0;z-index:2;background:var(--firstcol-bg);text-align:left}
     thead th:first-child{z-index:4}
+
     /* 3-op-een-rij serie-toggles boven de grafiek */
     #seriesToggles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:stretch;margin:10px 0}
-    #seriesToggles .tgl{min-width:0;width:100%;justify-content:flex-start;align-items:center;padding:6px 16px;text-align:left}
+    #seriesToggles .tgl{min-width:0;width:100%;justify-content:flex-start;align-items:center;text-align:left;padding-inline:12px}
     #seriesToggles .track{margin-right:10px}
     @media(max-width:900px){#seriesToggles{grid-template-columns:1fr 1fr}}
     @media(max-width:560px){#seriesToggles{grid-template-columns:1fr}}
@@ -81,7 +83,7 @@
   <main class="wrap" style="padding-top:14px;">
     <div class="grid">
       <!-- INSTELLINGEN -->
-      <section class="card">
+      <section class="card card-settings">
         <h2>Instellingen</h2>
         <div class="controls">
           <div class="field">
@@ -107,6 +109,12 @@
             <div class="slider-val" id="repayYearsOut">35 jaar</div>
           </div>
 
+          <div class="row-slider">
+            <label for="inpInvestYears">Beleggingshorizon (jaren)</label>
+            <input id="inpInvestYears" type="range" min="1" max="50" step="1" value="35" />
+            <div class="slider-val" id="investYearsOut">35 jaar</div>
+          </div>
+
           <div class="field">
             <label>Verwacht S&P500‑rendement p/j (%)</label>
             <select id="selReturn">
@@ -119,6 +127,19 @@
           <div class="field">
             <label>&nbsp;</label>
             <input id="inpCustomReturn" type="number" step="0.1" placeholder="Eigen %" style="display:none" />
+          </div>
+
+          <div class="field">
+            <label>Eigen inleg (€)</label>
+            <input id="inpOwn" type="number" min="0" step="1" value="0" />
+          </div>
+          <div class="field">
+            <label>Frequentie eigen inleg</label>
+            <select id="selOwnFreq">
+              <option value="monthly" selected>Maandelijks</option>
+              <option value="weekly">Wekelijks</option>
+              <option value="off">Uit</option>
+            </select>
           </div>
         </div>
 
@@ -145,13 +166,12 @@
       <section class="card">
         <h2>Simulatie</h2>
         <div class="kpis">
-          <div class="kpi"><div class="label">Totale inleg</div><div class="value" id="kInleg">€ 0</div><div class="tag" id="kMonths">— maanden</div></div>
+          <div class="kpi"><div class="label">Totale inleg</div><div class="value" id="kInleg">€ 0</div><div class="tag" id="kMonths">—</div></div>
           <div class="kpi"><div class="label">Totale extern betaalde DUO</div><div class="value" id="kExternal">€ 0</div><div class="tag">Aflossingen buiten portefeuille</div></div>
           <div class="kpi"><div class="label">Eindwaarde portefeuille</div><div class="value" id="kPort">€ 0</div><div class="tag" id="kPortTag">—</div></div>
           <div class="kpi"><div class="label">Netto resultaat</div><div class="value" id="kNetto">€ 0</div><div class="tag">≈ Eindportefeuille – extern betaalde DUO</div></div>
         </div>
 
-        <!-- Serie toggles onder KPI's en boven chart -->
         <div class="toggles" id="seriesToggles">
           <label class="tgl" id="wrapNet" role="switch" aria-checked="true"><input id="togNet" type="checkbox" checked><span class="track"><span class="thumb"></span></span><span class="txt">Netto</span></label>
           <label class="tgl" id="wrapPort" role="switch" aria-checked="true"><input id="togPort" type="checkbox" checked><span class="track"><span class="thumb"></span></span><span class="txt">Portefeuille</span></label>
@@ -182,6 +202,7 @@
             <tr>
               <th>Periode</th>
               <th>Inleg (€)</th>
+              <th>Eigen inleg (€)</th>
               <th>Aflossing DUO (€)</th>
               <th>Extern betaald (€)</th>
               <th>Rente DUO (som) (€)</th>
@@ -217,9 +238,12 @@
       let expAPR = (retSel === 'custom') ? (Number(gi('inpCustomReturn').value.replace(',', '.')) || 0) / 100 : (Number(retSel) / 100);
       expAPR = Math.max(0, expAPR);
       const repayYears = clamp(parseInt(gi('inpRepayYears').value || '0', 10), 1, 35);
+      const investYears = clamp(parseInt(gi('inpInvestYears').value || '0', 10), 1, 50);
+      const ownAmount = Math.max(0, Number(gi('inpOwn').value.replace(',', '.')) || 0);
+      const ownFreq = gi('selOwnFreq').value; // 'monthly' | 'weekly' | 'off'
       const payFromPortfolio = !gi('tglPay').checked; // UIT = uit portefeuille, AAN = extern
       const tableView = gi('selTableView').value;
-      return { amount, start, end, loanAPR, expAPR, repayYears, payFromPortfolio, tableView };
+      return { amount, start, end, loanAPR, expAPR, repayYears, investYears, ownAmount, ownFreq, payFromPortfolio, tableView };
     }
 
     // ===== Core simulation =====
@@ -227,26 +251,38 @@
       const rL = Math.pow(1 + cfg.loanAPR, 1 / 12) - 1; // loan monthly
       const rI = Math.pow(1 + cfg.expAPR, 1 / 12) - 1;  // invest monthly
 
-      const monthsBorrowed = monthsInclusive(cfg.start, cfg.end); // inclusive
+      const monthsBorrowed = monthsInclusive(cfg.start, cfg.end); // inclusive DUO
       const grad = cfg.end; const graceEnd = addMonths(grad, 24);
       const repayStartDate = addMonths(graceEnd, 1);
       const repayStartIdx = monthsBetween(cfg.start, repayStartDate);
       const repayMonths = cfg.repayYears * 12;
-      const totalMonths = Math.max(repayStartIdx + repayMonths, monthsBorrowed + 6);
+
+      const monthsInvest = cfg.investYears * 12; // looptijd beleggen
+
+      // Einde simulatie is max van aflosperiode en beleggingshorizon (en minimaal iets na DUO)
+      const totalMonths = Math.max(repayStartIdx + repayMonths, monthsInvest, monthsBorrowed + 6);
 
       function dryRun(monthsEnd){ let p=0; for(let i=0;i<monthsEnd;i++){ const c=(i<monthsBorrowed)?cfg.amount:0; p+=c; const interest=p*rL; p+=interest; } return {B0:p}; }
       const {B0} = dryRun(repayStartIdx);
       const r=rL, N=repayMonths; const P = (N>0) ? (r>0 ? B0 * (r / (1 - Math.pow(1+r, -N))) : (B0 / N)) : 0;
 
-      let principal=0, portfolio=0, totalInterest=0, totalInleg=0;
+      const ownMonthly = (cfg.ownFreq==='monthly') ? cfg.ownAmount : (cfg.ownFreq==='weekly' ? cfg.ownAmount * (52/12) : 0);
+
+      let principal=0, portfolio=0, totalInterest=0, totalInleg=0, totalDUOInleg=0, totalOwnInleg=0;
       const labels=[], arrPort=[], arrDebt=[], arrNet=[], arrPay=[], arrInt=[], arrExternalPay=[], arrPortfolioPay=[];
       let depletedAt=null;
 
       for (let i=0;i<totalMonths;i++){
         const date = addMonths(cfg.start, i); const label = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`; labels.push(label);
-        const contribute = (i < monthsBorrowed) ? cfg.amount : 0;
-        principal += contribute; totalInleg += contribute;
+        const cDuo = (i < monthsBorrowed) ? cfg.amount : 0;
+        const cOwn = (i < monthsInvest) ? ownMonthly : 0;
+        const contribute = cDuo + cOwn;
+
+        principal += cDuo; // eigen inleg vergroot géén schuld
+        totalDUOInleg += cDuo; totalOwnInleg += cOwn; totalInleg += contribute;
+
         const interest = principal * rL; principal += interest; totalInterest += interest;
+
         let pay=0, payFromPort=0, payExternal=0; if (i >= repayStartIdx) { pay = Math.min(P, principal); principal -= pay; }
         portfolio += contribute; if (cfg.payFromPortfolio && pay>0){ payFromPort = Math.min(pay, portfolio); portfolio -= payFromPort; if (payFromPort < pay) payExternal = pay - payFromPort; if (portfolio <= 0 && depletedAt === null){ depletedAt = date; portfolio = Math.max(0, portfolio); } } else { payExternal = pay; }
         portfolio *= (1 + rI);
@@ -258,12 +294,12 @@
       const totalPaid = arrPay.reduce((a,b)=>a+b,0); const totalExternal = arrExternalPay.reduce((a,b)=>a+b,0); const totalFromPortfolio = arrPortfolioPay.reduce((a,b)=>a+b,0);
 
       return { labels, arrPort, arrDebt, arrNet, arrPay, arrInt, arrExternalPay, arrPortfolioPay,
-        totals: { monthsBorrowed, totalInleg, totalInterest, endPortfolio, endDebt, totalPaid, totalExternal, totalFromPortfolio, netResult: endPortfolio - totalExternal },
-        meta: { grad, repayStartDate, graceEnd, monthlyPayment: P, depletedAt, repayEndDate: addMonths(repayStartDate, repayMonths) } };
+        totals: { monthsBorrowed, monthsInvest, totalInleg, totalDUOInleg, totalOwnInleg, totalInterest, endPortfolio, endDebt, totalPaid, totalExternal, totalFromPortfolio, netResult: endPortfolio - totalExternal },
+        meta: { grad, repayStartDate, graceEnd, monthlyPayment: P, depletedAt, repayEndDate: addMonths(repayStartDate, repayMonths), investEndDate: addMonths(cfg.start, monthsInvest) } };
     }
 
     // ===== Table aggregation =====
-    function groupRows(cfg, sim){ const mode=cfg.tableView||'month'; const rows=[]; const pushRow=(key,idxs)=>{ const lastIdx=idxs[idxs.length-1]; const sum=(arr)=>idxs.reduce((a,i)=>a+(arr[i]||0),0); const inlegSum=idxs.reduce((a,i)=> a + (i < sim.totals.monthsBorrowed ? cfg.amount : 0), 0); rows.push({ key, inleg: inlegSum, pay: sum(sim.arrPay), external: sum(sim.arrExternalPay), rente: sum(sim.arrInt), schuld: sim.arrDebt[lastIdx], port: sim.arrPort[lastIdx], saldo: sim.arrNet[lastIdx] }); };
+    function groupRows(cfg, sim){ const mode=cfg.tableView||'month'; const rows=[]; const pushRow=(key,idxs)=>{ const lastIdx=idxs[idxs.length-1]; const sum=(arr)=>idxs.reduce((a,i)=>a+(arr[i]||0),0); const duoSum=idxs.reduce((a,i)=> a + (i < sim.totals.monthsBorrowed ? cfg.amount : 0), 0); const ownPerMonth=(cfg.ownFreq==='monthly'?cfg.ownAmount:(cfg.ownFreq==='weekly'?cfg.ownAmount*(52/12):0)); const ownSum=idxs.reduce((a,i)=> a + (i < sim.totals.monthsInvest ? ownPerMonth : 0), 0); const inlegSum=duoSum + ownSum; rows.push({ key, inleg: inlegSum, inlegOwn: ownSum, pay: sum(sim.arrPay), external: sum(sim.arrExternalPay), rente: sum(sim.arrInt), schuld: sim.arrDebt[lastIdx], port: sim.arrPort[lastIdx], saldo: sim.arrNet[lastIdx] }); };
       if (mode==='month'){ for (let i=0;i<sim.labels.length;i++) pushRow(sim.labels[i],[i]); }
       else if (mode==='quarter'){ const groups={}; for (let i=0;i<sim.labels.length;i++){ const d=addMonths(cfg.start,i); const q=Math.floor(d.getMonth()/3)+1; const key=`${d.getFullYear()} Q${q}`; if(!groups[key]) groups[key]=[]; groups[key].push(i);} Object.keys(groups).forEach(k=>pushRow(k, groups[k])); }
       else { const groups={}; for (let i=0;i<sim.labels.length;i++){ const d=addMonths(cfg.start,i); const key=`${d.getFullYear()}`; if(!groups[key]) groups[key]=[]; groups[key].push(i);} Object.keys(groups).forEach(k=>pushRow(k, groups[k])); }
@@ -282,15 +318,23 @@
     const applyChartTheme=()=>{ const d=chart.data.datasets; d[0].borderColor=getCSS('--line-portfolio'); d[1].borderColor=getCSS('--line-netto'); d[2].borderColor=getCSS('--line-debt'); chart.update('none'); };
 
     // ===== Renderers =====
-    function renderTable(cfg, sim){ const tbody=document.querySelector('#tbl tbody'); const rows=groupRows(cfg, sim); tbody.innerHTML=rows.map(r=>`<tr><td>${r.key}</td><td>${euro2(r.inleg)}</td><td>${euro2(r.pay)}</td><td>${euro2(r.external)}</td><td>${euro2(r.rente)}</td><td>${euro2(r.schuld)}</td><td>${euro2(r.port)}</td><td>${euro2(r.saldo)}</td></tr>`).join(''); }
+    function renderTable(cfg, sim){ const tbody=document.querySelector('#tbl tbody'); const rows=groupRows(cfg, sim); tbody.innerHTML=rows.map(r=>`<tr><td>${r.key}</td><td>${euro2(r.inleg)}</td><td>${euro2(r.inlegOwn)}</td><td>${euro2(r.pay)}</td><td>${euro2(r.external)}</td><td>${euro2(r.rente)}</td><td>${euro2(r.schuld)}</td><td>${euro2(r.port)}</td><td>${euro2(r.saldo)}</td></tr>`).join(''); }
 
     function update(){
       gi('repayYearsOut').textContent = `${gi('inpRepayYears').value} jaar`;
+      gi('investYearsOut').textContent = `${gi('inpInvestYears').value} jaar`;
       const cfg=getInputs(); const out=simulate(cfg);
 
-      gi('kInleg').textContent=euro(out.totals.totalInleg); gi('kMonths').textContent=`${out.totals.monthsBorrowed} maanden`; gi('kPort').textContent=euro(out.totals.endPortfolio); gi('kExternal').textContent=euro(out.totals.totalExternal); gi('kNetto').textContent=euro(out.totals.netResult); gi('kPortTag').textContent=!cfg.payFromPortfolio?'Aflossingen extern betaald':(out.meta.depletedAt?`Aflossingen uit portefeuille • leeg in ${out.meta.depletedAt.getFullYear()}-${String(out.meta.depletedAt.getMonth()+1).padStart(2,'0')}`:'Aflossingen uit portefeuille');
+      gi('kInleg').textContent=euro(out.totals.totalInleg);
+      const ownLbl = cfg.ownAmount>0 && cfg.ownFreq!=='off' ? ` • eigen inleg ${cfg.ownFreq==='weekly'?'wekelijks':'maandelijks'}` : '';
+      gi('kMonths').textContent=`${out.totals.monthsBorrowed} maanden DUO${ownLbl}`;
+      gi('kPort').textContent=euro(out.totals.endPortfolio);
+      gi('kExternal').textContent=euro(out.totals.totalExternal);
+      gi('kNetto').textContent=euro(out.totals.netResult);
+      gi('kPortTag').textContent=!cfg.payFromPortfolio?'Aflossingen extern betaald':(out.meta.depletedAt?`Aflossingen uit portefeuille • leeg in ${out.meta.depletedAt.getFullYear()}-${String(out.meta.depletedAt.getMonth()+1).padStart(2,'0')}`:'Aflossingen uit portefeuille');
 
-      const fmt=(d)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; gi('phaseNote').innerHTML=`Einde studie/laatste uitkering: <strong>${fmt(out.meta.grad)}</strong> • Aanloopfase tot: <strong>${fmt(out.meta.graceEnd)}</strong> • Start aflossen: <strong>${fmt(out.meta.repayStartDate)}</strong> • Maandbedrag DUO: <strong>${euro2(out.meta.monthlyPayment)}</strong> • Einde aflossen: <strong>${fmt(out.meta.repayEndDate)}</strong>`;
+      const fmt=(d)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      gi('phaseNote').innerHTML=`Einde studie/laatste uitkering: <strong>${fmt(out.meta.grad)}</strong> • Aanloopfase tot: <strong>${fmt(out.meta.graceEnd)}</strong> • Start aflossen: <strong>${fmt(out.meta.repayStartDate)}</strong> • Einde aflossen: <strong>${fmt(out.meta.repayEndDate)}</strong> • <em>Beleggingshorizon eindigt</em>: <strong>${fmt(out.meta.investEndDate)}</strong>`;
 
       renderTable(cfg, out);
 
@@ -314,7 +358,7 @@
     function setDefaultDates(){ const start=new Date('2024-08-24'); const end=new Date('2026-07-24'); gi('inpStart').value=`${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`; gi('inpEnd').value=`${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,'0')}-${String(end.getDate()).padStart(2,'0')}`; }
     setDefaultDates();
 
-    ['inpAmount','inpLoanAPR','inpStart','inpEnd','inpRepayYears','selReturn','inpCustomReturn','selTableView'].forEach(id=>{ gi(id).addEventListener('input',()=>{ if(id==='selReturn'){ gi('inpCustomReturn').style.display = gi('selReturn').value==='custom' ? 'block' : 'none'; } update(); }); gi(id).addEventListener('change', update); });
+    ['inpAmount','inpLoanAPR','inpStart','inpEnd','inpRepayYears','inpInvestYears','selReturn','inpCustomReturn','selOwnFreq','inpOwn','selTableView'].forEach(id=>{ gi(id).addEventListener('input',()=>{ if(id==='selReturn'){ gi('inpCustomReturn').style.display = gi('selReturn').value==='custom' ? 'block' : 'none'; } update(); }); gi(id).addEventListener('change', update); });
 
     function wireToggleInput(inputId, wrapId, onChange){ const inp=gi(inputId); const wrap=gi(wrapId); const sync=()=>wrap.setAttribute('aria-checked', String(!!inp.checked)); inp.addEventListener('change', ()=>{ if(inputId==='tglDark'){ document.body.classList.toggle('light', !inp.checked); } if(inputId==='tglPay'){ gi('tglPayTxt').textContent = inp.checked ? 'DUO extern betalen' : 'DUO betalen uit portefeuille'; } sync(); onChange&&onChange(); }); sync(); }
     wireToggleInput('tglPay','tglPayWrap', update); wireToggleInput('tglDark','tglDarkWrap', ()=>{ applyChartTheme(); update(); });
@@ -322,10 +366,10 @@
     function wireChartToggle(id,wrapId){ const inp=gi(id); const wrap=gi(wrapId); const sync=()=>wrap.setAttribute('aria-checked', String(!!inp.checked)); inp.addEventListener('change', ()=>{ sync(); update(); }); sync(); }
     wireChartToggle('togNet','wrapNet'); wireChartToggle('togPort','wrapPort'); wireChartToggle('togDebt','wrapDebt');
 
-    gi('btnReset').addEventListener('click', (e)=>{ e.preventDefault(); setDefaultDates(); gi('inpAmount').value=724; gi('inpLoanAPR').value=2.57; gi('selReturn').value='8'; gi('inpCustomReturn').value=''; gi('inpRepayYears').value=35; gi('repayYearsOut').textContent='35 jaar'; gi('tglPay').checked=false; gi('tglPay').dispatchEvent(new Event('change')); gi('tglDark').checked=true; gi('tglDark').dispatchEvent(new Event('change')); gi('togNet').checked=true; gi('togNet').dispatchEvent(new Event('change')); gi('togPort').checked=true; gi('togPort').dispatchEvent(new Event('change')); gi('togDebt').checked=false; gi('togDebt').dispatchEvent(new Event('change')); update(); });
+    gi('btnReset').addEventListener('click', (e)=>{ e.preventDefault(); setDefaultDates(); gi('inpAmount').value=724; gi('inpLoanAPR').value=2.57; gi('selReturn').value='8'; gi('inpCustomReturn').value=''; gi('inpRepayYears').value=35; gi('inpInvestYears').value=35; gi('repayYearsOut').textContent='35 jaar'; gi('investYearsOut').textContent='35 jaar'; gi('inpOwn').value=0; gi('selOwnFreq').value='monthly'; gi('tglPay').checked=false; gi('tglPay').dispatchEvent(new Event('change')); gi('tglDark').checked=true; gi('tglDark').dispatchEvent(new Event('change')); gi('togNet').checked=true; gi('togNet').dispatchEvent(new Event('change')); gi('togPort').checked=true; gi('togPort').dispatchEvent(new Event('change')); gi('togDebt').checked=false; gi('togDebt').dispatchEvent(new Event('change')); update(); });
 
     // ===== Self tests =====
-    (function selfTest(){ try { console.assert(monthsBetween(new Date('2024-01-24'), new Date('2024-02-24')) === 1, 'monthsBetween 1m'); console.assert(monthsInclusive(new Date('2024-01-24'), new Date('2024-03-24')) === 3, 'monthsInclusive 3m'); const cfg = { amount: 1000, start: new Date('2024-01-24'), end: new Date('2024-12-24'), loanAPR: 0.03, expAPR: 0.07, repayYears: 1, payFromPortfolio: false }; const out = simulate(cfg); const ok = [out.arrPort, out.arrDebt, out.arrNet, out.arrPay].every(a => a.every(v => Number.isFinite(v))); console.assert(ok, 'arrays contain finite numbers'); } catch(e){ console.warn('Self‑tests warning:', e); } })();
+    (function selfTest(){ try { console.assert(monthsBetween(new Date('2024-01-24'), new Date('2024-02-24')) === 1, 'monthsBetween 1m'); console.assert(monthsInclusive(new Date('2024-01-24'), new Date('2024-03-24')) === 3, 'monthsInclusive 3m'); const cfg = { amount: 1000, start: new Date('2024-01-24'), end: new Date('2024-12-24'), loanAPR: 0.03, expAPR: 0.07, repayYears: 1, investYears: 2, ownAmount: 25, ownFreq:'weekly', payFromPortfolio: false }; const out = simulate(cfg); const ok = [out.arrPort, out.arrDebt, out.arrNet, out.arrPay].every(a => a.every(v => Number.isFinite(v))); console.assert(ok, 'arrays contain finite numbers'); console.assert(out.totals.totalOwnInleg>0, 'own contribution included'); } catch(e){ console.warn('Self‑tests warning:', e); } })();
 
     update();
   </script>
