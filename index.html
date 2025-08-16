@@ -147,7 +147,7 @@
           <label class="tgl" id="tglPayWrap" role="switch" aria-checked="false">
             <input id="tglPay" type="checkbox" />
             <span class="track"><span class="thumb"></span></span>
-            <span class="txt" id="tglPayTxt">DUO betalen uit portefeuille</span>
+            <span class="txt" >Schuld betalen uit portefeuille</span>
           </label>
           <label class="tgl" id="tglDarkWrap" role="switch" aria-checked="true">
             <input id="tglDark" type="checkbox" checked />
@@ -241,7 +241,7 @@
       const investYears = clamp(parseInt(gi('inpInvestYears').value || '0', 10), 1, 50);
       const ownAmount = Math.max(0, Number(gi('inpOwn').value.replace(',', '.')) || 0);
       const ownFreq = gi('selOwnFreq').value; // 'monthly' | 'weekly' | 'off'
-      const payFromPortfolio = !gi('tglPay').checked; // UIT = uit portefeuille, AAN = extern
+      const payFromPortfolio = gi('tglPay').checked; // UIT = uit portefeuille, AAN = extern
       const tableView = gi('selTableView').value;
       return { amount, start, end, loanAPR, expAPR, repayYears, investYears, ownAmount, ownFreq, payFromPortfolio, tableView };
     }
@@ -360,7 +360,7 @@
 
     ['inpAmount','inpLoanAPR','inpStart','inpEnd','inpRepayYears','inpInvestYears','selReturn','inpCustomReturn','selOwnFreq','inpOwn','selTableView'].forEach(id=>{ gi(id).addEventListener('input',()=>{ if(id==='selReturn'){ gi('inpCustomReturn').style.display = gi('selReturn').value==='custom' ? 'block' : 'none'; } update(); }); gi(id).addEventListener('change', update); });
 
-    function wireToggleInput(inputId, wrapId, onChange){ const inp=gi(inputId); const wrap=gi(wrapId); const sync=()=>wrap.setAttribute('aria-checked', String(!!inp.checked)); inp.addEventListener('change', ()=>{ if(inputId==='tglDark'){ document.body.classList.toggle('light', !inp.checked); } if(inputId==='tglPay'){ gi('tglPayTxt').textContent = inp.checked ? 'DUO extern betalen' : 'DUO betalen uit portefeuille'; } sync(); onChange&&onChange(); }); sync(); }
+    function wireToggleInput(inputId, wrapId, onChange){ const inp=gi(inputId); const wrap=gi(wrapId); const sync=()=>wrap.setAttribute('aria-checked', String(!!inp.checked)); inp.addEventListener('change', ()=>{ if(inputId==='tglDark'){ document.body.classList.toggle('light', !inp.checked); }  sync(); onChange&&onChange(); }); sync(); }
     wireToggleInput('tglPay','tglPayWrap', update); wireToggleInput('tglDark','tglDarkWrap', ()=>{ applyChartTheme(); update(); });
 
     function wireChartToggle(id,wrapId){ const inp=gi(id); const wrap=gi(wrapId); const sync=()=>wrap.setAttribute('aria-checked', String(!!inp.checked)); inp.addEventListener('change', ()=>{ sync(); update(); }); sync(); }
