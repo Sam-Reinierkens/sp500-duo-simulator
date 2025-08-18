@@ -44,24 +44,7 @@
     .controls{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;align-items:start}
     .field{display:grid;grid-template-rows:auto 44px;gap:6px}
     .field label{font-size:.9rem;color:var(--muted);line-height:1.2}
-
-    /* Belangrijk: zorg dat ALLE inputs/selects altijd 100% van de kolombreedte pakken */
-    input[type="number"],
-    input[type="date"],
-    select{
-      height:44px;
-      width:100%;
-      display:block;
-      border-radius:var(--radius-input);
-      border:1px solid rgba(255,255,255,.1);
-      background:rgba(255,255,255,.06);
-      color:var(--text);
-      padding:0 12px;
-      outline:none;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
-      font-variant-numeric:tabular-nums;
-      transition:box-shadow .2s,border-color .2s,background .2s;
-    }
+    input[type="number"],input[type="date"],select{height:44px;border-radius:var(--radius-input);border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:var(--text);padding:0 12px;outline:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.03);font-variant-numeric:tabular-nums;transition:box-shadow .2s,border-color .2s,background .2s}
     input[type="number"]:focus,input[type="date"]:focus,select:focus{border-color:color-mix(in oklab,var(--accent),#fff 10%); box-shadow:0 0 0 3px color-mix(in oklab,var(--accent),transparent 85%)}
 
     /* Light mode */
@@ -360,10 +343,11 @@
         const starter = (i===0 ? (cfg.initialOwn||0) : 0);
         const cOwn = (i < monthsInvest) ? ownMonthly : 0;
         portD += cDuo; portO += (starter + cOwn);
+        totalDUOInleg += cDuo; totalOwnInleg += (starter + cOwn); totalInleg += (cDuo + starter + cOwn);
         arrInlegDuo.push(cDuo); arrInlegOwn.push(starter + cOwn); arrInlegTotal.push(cDuo + starter + cOwn);
 
         principal += cDuo;
-        const interest = principal * rL; principal += interest; arrInt.push(interest);
+        const interest = principal * rL; principal += interest; totalInterest += interest; arrInt.push(interest);
 
         let pay=0, payFromPort=0, payExternal=0;
         if (i >= repayStartIdx) { pay = Math.min(P, principal); principal -= pay; }
@@ -387,6 +371,7 @@
         arrPay.push(pay||0); arrExternalPay.push(payExternal||0); arrPortfolioPay.push(payFromPort||0);
       }
 
+      // FX achteraf (constante factor)
       if (cfg.fxOn && cfg.fxTotal !== 0){
         const f = 1 + cfg.fxTotal;
         for (let i=0;i<arrPort.length;i++){ arrPort[i]*=f; arrNet[i]*=f; }
@@ -399,10 +384,11 @@
       const totalFromPortfolio = arrPortfolioPay.reduce((a,b)=>a+b,0);
 
       return { labels, arrPort, arrDebt, arrNet, arrPay, arrInt, arrExternalPay, arrPortfolioPay, arrInlegDuo, arrInlegOwn, arrInlegTotal,
-        totals: { monthsBorrowed, monthsInvest, totalInleg: arrInlegTotal.reduce((a,b)=>a+b,0), totalDUOInleg: arrInlegDuo.reduce((a,b)=>a+b,0), totalOwnInleg: arrInlegOwn.reduce((a,b)=>a+b,0), totalInterest, endPortfolio, endDebt, totalPaid, totalExternal, totalFromPortfolio, netResult: endPortfolio - totalExternal },
+        totals: { monthsBorrowed, monthsInvest, totalInleg, totalDUOInleg, totalOwnInleg, totalInterest, endPortfolio, endDebt, totalPaid, totalExternal, totalFromPortfolio, netResult: endPortfolio - totalExternal },
         meta: { grad, repayStartDate, graceEnd, monthlyPayment: P, depletedAt, repayEndDate: addMonths(repayStartDate, repayMonths), investEndDate: addMonths(cfg.start, monthsInvest) } };
     }
 
+    // ===== Deflatie helper (reële weergave – NA FX) =====
     function deflateView(sim, inflAPR){
       const rInf = Math.pow(1 + inflAPR, 1/12) - 1;
       const df = (i) => 1 / Math.pow(1 + rInf, i);
@@ -422,6 +408,7 @@
       };
     }
 
+    // ===== Tabel-aggregatie =====
     function groupRows(sim){
       const mode=gi('selTableView')?.value||'month';
       const rows=[];
@@ -443,6 +430,7 @@
       return rows;
     }
 
+    // ===== Chart =====
     let chart;
     function ensureChart(){
       if (chart) return chart;
@@ -472,6 +460,7 @@
     }
     const applyChartTheme=()=>{ if(!chart) return; const d=chart.data.datasets; d[0].borderColor=getCSS('--line-portfolio'); d[1].borderColor=getCSS('--line-netto'); d[2].borderColor=getCSS('--line-debt'); chart.update('none'); };
 
+    // ===== Renderers =====
     function renderTable(sim){
       const tbody=document.querySelector('#tbl tbody'); if(!tbody) return; const rows=groupRows(sim);
       tbody.innerHTML=rows.map(r=>`<tr>
@@ -493,9 +482,10 @@
       setText('investYearsOut', `${gi('inpInvestYears')?.value||''} jaar`);
 
       const cfg=getInputs();
-      const simNomFX = simulate(cfg);
-      const sim = cfg.inflOn ? deflateView(simNomFX, cfg.inflAPR) : simNomFX;
+      const simNomFX = simulate(cfg);               // eerst rekenen (nominaal), dan FX (in simulate)
+      const sim = cfg.inflOn ? deflateView(simNomFX, cfg.inflAPR) : simNomFX; // inflatie als reële weergave achteraf
 
+      // KPI's
       const last = sim.labels.length - 1;
       const sum = (a)=>a.reduce((x,y)=>x+y,0);
       const totalInleg = sum(sim.arrInlegTotal);
@@ -522,12 +512,13 @@
 
       renderTable(sim);
 
+      // Chart
       const ch = ensureChart();
       if (ch){
         ch.data.labels = sim.labels;
         ch.data.datasets[0].data = sim.arrPort;
         ch.data.datasets[1].data = sim.arrNet;
-        ch.data.datasets[2].data = sim.arrDebt.map(v=>-v);
+        ch.data.datasets[2].data = sim.arrDebt.map(v=>-v); // schuld onder nul
 
         ch.data.datasets[0].hidden = !gi('togPort')?.checked;
         ch.data.datasets[1].hidden = !gi('togNet')?.checked;
@@ -540,6 +531,7 @@
       }
     }
 
+    // ===== Events & defaults =====
     function setDefaultDates(){ const start=new Date('2024-08-24'); const end=new Date('2026-07-24'); const s=gi('inpStart'); const e=gi('inpEnd'); if(s) s.value=`${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`; if(e) e.value=`${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,'0')}-${String(end.getDate()).padStart(2,'0')}`; }
 
     function wireToggleInput(inputId, wrapId, onChange){ const inp=gi(inputId); const wrap=gi(wrapId); if(!inp||!wrap) return; const sync=()=>wrap.setAttribute('aria-checked', String(!!inp.checked)); inp.addEventListener('change', ()=>{ if(inputId==='tglDark'){ document.body.classList.toggle('light', !inp.checked); } sync(); onChange&&onChange(); }); sync(); }
@@ -565,6 +557,7 @@
       }catch(e){ console.warn('Self-tests warning:', e); }
     }
 
+    // Boot
     document.addEventListener('DOMContentLoaded', ()=>{
       setDefaultDates();
       wireInputs();
