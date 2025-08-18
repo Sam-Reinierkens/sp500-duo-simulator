@@ -83,7 +83,7 @@
     table{width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
     td,th{padding:10px;border-bottom:1px dashed rgba(255,255,255,.08);text-align:right;background:transparent}
     thead th{color:var(--muted);font-weight:600;position:sticky;top:0;z-index:3;background:var(--thead-bg);backdrop-filter:saturate(130%) blur(4px);box-shadow:inset 0 -1px 0 rgba(255,255,255,.08)}
-    th:first-child,td:first-child{position:sticky;left:0;z-index:2;background:var(--firstcol-bg);text-align:left;min-width:130px}
+    th:first-child,td:first-child{position:sticky;left:0;z-index:2;background:var(--firstcol-bg);text-align:left;min-width:120px}
     thead th:first-child{z-index:4}
 
     /* 3-op-een-rij serie-toggles boven de grafiek */
@@ -145,15 +145,7 @@
 
           <div class="field">
             <label>Verwacht rendement p/j (%)</label>
-            <div class="inline-pair">
-              <select id="selReturn">
-                <option value="6">6%</option>
-                <option value="8" selected>8%</option>
-                <option value="10">10%</option>
-                <option value="custom">Aangepast…</option>
-              </select>
-              <input id="inpCustomReturn" type="number" step="0.1" placeholder="Eigen %" style="display:none; min-width:100px" />
-            </div>
+            <input id="inpReturnAPR" type="number" step="0.1" min="0" value="8" />
           </div>
           <div class="field">
             <label>Initiële eigen inleg (€)</label>
@@ -299,9 +291,7 @@
       const endStr = gi('inpEnd')?.value || '';
       const start = startStr ? new Date(startStr) : new Date();
       const end = endStr ? new Date(endStr) : new Date();
-      const retSel = gi('selReturn')?.value || '8';
-      let expAPR = (retSel === 'custom') ? ((Number(gi('inpCustomReturn')?.value?.replace(',', '.') ?? 0) || 0) / 100) : (Number(retSel) / 100);
-      expAPR = Math.max(0, expAPR);
+      const expAPR = Math.max(0, Number(gi('inpReturnAPR')?.value?.replace(',', '.') ?? 0) || 0) / 100; // direct invoer
       const repayYears = clamp(parseInt(gi('inpRepayYears')?.value || '35', 10), 1, 35);
       const investYears = clamp(parseInt(gi('inpInvestYears')?.value || '39', 10), 1, 50);
       const ownAmount = Math.max(0, Number(gi('inpOwn')?.value?.replace(',', '.') ?? 0) || 0);
@@ -543,14 +533,14 @@
     function wireChartToggle(id,wrapId){ const inp=gi(id); const wrap=gi(wrapId); if(!inp||!wrap) return; const sync=()=>wrap.setAttribute('aria-checked', String(!!inp.checked)); inp.addEventListener('change', ()=>{ sync(); update(); }); sync(); }
 
     function wireInputs(){
-      ['inpAmount','inpLoanAPR','inpStart','inpEnd','inpRepayYears','inpInvestYears','selReturn','inpCustomReturn','selOwnFreq','inpOwn','inpInitialOwn','selTableView','inpInflAPR','inpFXAPR']
-        .forEach(id=>{ const el=gi(id); if(!el) return; el.addEventListener('input',()=>{ if(id==='selReturn'){ const s=gi('selReturn'); const c=gi('inpCustomReturn'); if(s&&c){ c.style.display = s.value==='custom' ? 'block' : 'none'; } } update(); }); el.addEventListener('change', update); });
+      ['inpAmount','inpLoanAPR','inpStart','inpEnd','inpRepayYears','inpInvestYears','inpReturnAPR','selOwnFreq','inpOwn','inpInitialOwn','selTableView','inpInflAPR','inpFXAPR']
+        .forEach(id=>{ const el=gi(id); if(!el) return; el.addEventListener('input',()=>{ update(); }); el.addEventListener('change', update); });
       wireToggleInput('tglPay','tglPayWrap', update);
       wireToggleInput('tglInfl','tglInflWrap', update);
       wireToggleInput('tglFX','tglFXWrap', update);
       wireToggleInput('tglDark','tglDarkWrap', ()=>{ applyChartTheme(); update(); });
       wireChartToggle('togNet','wrapNet'); wireChartToggle('togPort','wrapPort'); wireChartToggle('togDebt','wrapDebt');
-      const btn=gi('btnReset'); if(btn){ btn.addEventListener('click', (e)=>{ e.preventDefault(); setDefaultDates(); const set=(id,val)=>{ const el=gi(id); if(el) el.value=val; }; set('inpAmount',724); set('inpLoanAPR',2.57); const sr=gi('selReturn'); if(sr) sr.value='8'; set('inpCustomReturn',''); set('inpRepayYears',35); set('inpInvestYears',39); setText('repayYearsOut','35 jaar'); setText('investYearsOut','39 jaar'); set('inpOwn',0); set('inpInitialOwn',0); const of=gi('selOwnFreq'); if(of) of.value='monthly'; set('inpInflAPR',2.1); set('inpFXAPR',0); const ck=(id,val)=>{ const el=gi(id); if(el){ el.checked=val; el.dispatchEvent(new Event('change')); } }; ck('tglPay',false); ck('tglInfl',false); ck('tglFX',false); ck('tglDark',true); ck('togNet',false); ck('togPort',true); ck('togDebt',false); update(); }); }
+      const btn=gi('btnReset'); if(btn){ btn.addEventListener('click', (e)=>{ e.preventDefault(); setDefaultDates(); const set=(id,val)=>{ const el=gi(id); if(el) el.value=val; }; set('inpAmount',724); set('inpLoanAPR',2.57); set('inpReturnAPR',8); set('inpRepayYears',35); set('inpInvestYears',39); setText('repayYearsOut','35 jaar'); setText('investYearsOut','39 jaar'); set('inpOwn',0); set('inpInitialOwn',0); const of=gi('selOwnFreq'); if(of) of.value='monthly'; set('inpInflAPR',2.1); set('inpFXAPR',0); const ck=(id,val)=>{ const el=gi(id); if(el){ el.checked=val; el.dispatchEvent(new Event('change')); } }; ck('tglPay',false); ck('tglInfl',false); ck('tglFX',false); ck('tglDark',true); ck('togNet',false); ck('togPort',true); ck('togDebt',false); update(); }); }
     }
 
     function selfTests(){
