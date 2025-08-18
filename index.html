@@ -444,11 +444,22 @@
       chart = new Chart(ctx, {
         type: 'line',
         data: { labels: [], datasets: [
-          { label:'Portefeuille', data: [], tension:.25, borderWidth:1.8, fill:false, borderColor:getCSS('--line-portfolio'), pointRadius:0, hidden:false },
-          { label:'Netto', data: [], tension:.25, borderWidth:1.8, fill:false, borderColor:getCSS('--line-netto'), pointRadius:0, hidden:true },
-          { label:'Schuld (overlay)', data: [], tension:.2, borderWidth:1.2, fill:false, borderColor:getCSS('--line-debt'), pointRadius:0, borderDash:[6,4], hidden:true }
+          { label:'Portefeuille', data: [], tension:.25, borderWidth:1.8, fill:false, borderColor:getCSS('--line-portfolio'), pointRadius:0, pointHitRadius:18, pointHoverRadius:3, hidden:false },
+          { label:'Netto', data: [], tension:.25, borderWidth:1.8, fill:false, borderColor:getCSS('--line-netto'), pointRadius:0, pointHitRadius:18, pointHoverRadius:3, hidden:true },
+          { label:'Schuld (overlay)', data: [], tension:.2, borderWidth:1.2, fill:false, borderColor:getCSS('--line-debt'), pointRadius:0, pointHitRadius:18, pointHoverRadius:3, borderDash:[6,4], hidden:true }
         ]},
-        options: { responsive:true, maintainAspectRatio:false, animations:{ duration:200 }, elements:{ point:{ radius:0 } }, plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(ctx)=>{ const ds=ctx.dataset.label; const v=ctx.parsed.y||0; return `${ds}: ${euro2(v)}`; } } } }, scales:{ y:{ beginAtZero:false }, x:{ ticks:{ maxRotation:0, autoSkip:true, maxTicksLimit:10 } } } }
+        options: {
+          responsive:true,
+          maintainAspectRatio:false,
+          animations:{ duration:200 },
+          interaction:{ mode:'index', intersect:false, axis:'x' },
+          elements:{ point:{ radius:0, hitRadius:18, hoverRadius:3 } },
+          plugins:{
+            legend:{ display:false },
+            tooltip:{ callbacks:{ label:(ctx)=>{ const ds=ctx.dataset.label; const v=ctx.parsed.y||0; return `${ds}: ${euro2(v)}`; } } }
+          },
+          scales:{ y:{ beginAtZero:false }, x:{ ticks:{ maxRotation:0, autoSkip:true, maxTicksLimit:10 } } }
+        }
       });
       return chart;
     }
