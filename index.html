@@ -98,6 +98,21 @@
     .inline-pair select{flex:1;min-width:0}
     .inline-pair .tgl{min-width:unset;padding-inline:10px;height:44px}
     .field-full{grid-column:1/-1}
+
+    /* NEW: laat 'Inflatie' en 'USD/EUR' netjes uitlijnen met kolombreedtes */
+    .field-full .inline-pair{
+      display:grid;
+      grid-template-columns: 1fr 1fr; /* twee gelijke kolommen, zoals de hoofdgrid */
+      gap:16px;
+      align-items:center;
+    }
+    .field-full .inline-pair input[type="number"]{
+      width:100%; /* linkerveld precies één kolom breed */
+    }
+    .field-full .inline-pair .tgl{
+      min-width:var(--chip-w);   /* toggle even “lang” als elders */
+      justify-self:start;        /* uitlijnen aan linkerkant van de kolom */
+    }
   </style>
 </head>
 <body>
@@ -119,7 +134,7 @@
             <input id="inpAmount" type="number" min="0" step="1" value="724" />
           </div>
           <div class="field">
-            <label>DUO‑rente per jaar (%)</label>
+            <label>DUO-rente per jaar (%)</label>
             <input id="inpLoanAPR" type="number" min="0" step="0.01" value="2.57" />
           </div>
           <div class="field">
@@ -127,7 +142,7 @@
             <input id="inpStart" type="date" />
           </div>
           <div class="field">
-            <label>Einde studie / laatste DUO‑uitkering</label>
+            <label>Einde studie / laatste DUO-uitkering</label>
             <input id="inpEnd" type="date" />
           </div>
 
@@ -203,7 +218,7 @@
         </div>
 
         <div class="sub" style="margin-top:6px">
-          Aanname: 24 maanden aanloopfase na <strong>einde studie/laatste DUO‑uitkering</strong>. Rente maandelijks samengesteld. Aflossing annuïtair over de gekozen looptijd.
+          Aanname: 24 maanden aanloopfase na <strong>einde studie/laatste DUO-uitkering</strong>. Rente maandelijks samengesteld. Aflossing annuïtair over de gekozen looptijd.
         </div>
         <div class="toolbar" style="margin-top:12px; gap:8px; flex-wrap:wrap; display:flex;">
           <button id="btnReset" class="secondary">Reset</button>
@@ -217,10 +232,10 @@
           <span id="viewModeBadge" class="badge">Nominaal</span>
         </div>
         <div class="kpis">
-          <div class="kpi"><div class="label">Totale inleg</div><div class="value" id="kInleg">€ 0</div><div class="tag" id="kMonths">—</div></div>
-          <div class="kpi"><div class="label">Totale extern betaalde DUO</div><div class="value" id="kExternal">€ 0</div><div class="tag">Aflossingen buiten portefeuille</div></div>
-          <div class="kpi"><div class="label">Eindwaarde portefeuille</div><div class="value" id="kPort">€ 0</div><div class="tag" id="kPortTag">—</div></div>
-          <div class="kpi"><div class="label">Netto resultaat</div><div class="value" id="kNetto">€ 0</div><div class="tag">≈ Eindportefeuille – extern betaalde DUO</div></div>
+          <div class="kpi"><div class="label">Totale inleg</div><div class="value" id="kInleg">€ 0</div><div class="tag" id="kMonths">—</div></div>
+          <div class="kpi"><div class="label">Totale extern betaalde DUO</div><div class="value" id="kExternal">€ 0</div><div class="tag">Aflossingen buiten portefeuille</div></div>
+          <div class="kpi"><div class="label">Eindwaarde portefeuille</div><div class="value" id="kPort">€ 0</div><div class="tag" id="kPortTag">—</div></div>
+          <div class="kpi"><div class="label">Netto resultaat</div><div class="value" id="kNetto">€ 0</div><div class="tag">≈ Eindportefeuille – extern betaalde DUO</div></div>
         </div>
 
         <div class="toggles" id="seriesToggles">
@@ -252,7 +267,7 @@
             <tr>
               <th style="min-width:120px">Periode</th>
               <th>Totale inleg (€)</th>
-              <th>DUO‑inleg (€)</th>
+              <th>DUO-inleg (€)</th>
               <th>Eigen inleg (€)</th>
               <th>Aflossing DUO (€)</th>
               <th>Extern betaald (€)</th>
