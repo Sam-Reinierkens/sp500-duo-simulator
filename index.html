@@ -95,6 +95,7 @@
 
     .inline-pair{display:flex;gap:8px;align-items:center}
     .inline-pair input[type="number"]{flex:1}
+    .inline-pair select{flex:1;min-width:0}
     .inline-pair .tgl{min-width:unset;padding-inline:10px;height:44px}
     .field-full{grid-column:1/-1}
   </style>
@@ -143,17 +144,20 @@
           </div>
 
           <div class="field">
-            <label>Verwacht S&P500‑rendement p/j (%)</label>
-            <select id="selReturn">
-              <option value="6">6%</option>
-              <option value="8" selected>8%</option>
-              <option value="10">10%</option>
-              <option value="custom">Aangepast…</option>
-            </select>
+            <label>Verwacht rendement p/j (%)</label>
+            <div class="inline-pair">
+              <select id="selReturn">
+                <option value="6">6%</option>
+                <option value="8" selected>8%</option>
+                <option value="10">10%</option>
+                <option value="custom">Aangepast…</option>
+              </select>
+              <input id="inpCustomReturn" type="number" step="0.1" placeholder="Eigen %" style="display:none; min-width:100px" />
+            </div>
           </div>
           <div class="field">
-            <label>&nbsp;</label>
-            <input id="inpCustomReturn" type="number" step="0.1" placeholder="Eigen %" style="display:none" />
+            <label>Initiële eigen inleg (€)</label>
+            <input id="inpInitialOwn" type="number" min="0" step="1" value="0" />
           </div>
 
           <div class="field">
@@ -301,12 +305,13 @@
       const repayYears = clamp(parseInt(gi('inpRepayYears')?.value || '35', 10), 1, 35);
       const investYears = clamp(parseInt(gi('inpInvestYears')?.value || '39', 10), 1, 50);
       const ownAmount = Math.max(0, Number(gi('inpOwn')?.value?.replace(',', '.') ?? 0) || 0);
+      const initialOwn = Math.max(0, Number(gi('inpInitialOwn')?.value?.replace(',', '.') ?? 0) || 0);
       const ownFreq = gi('selOwnFreq')?.value || 'monthly'; // 'monthly' | 'weekly' | 'off'
       const payFromPortfolio = !!gi('tglPay')?.checked; // AAN = uit portefeuille
       const inflOn = !!gi('tglInfl')?.checked; // reëel tonen
       const fxOn = !!gi('tglFX')?.checked;     // FX toepassen
       const tableView = gi('selTableView')?.value || 'month';
-      return { amount, start, end, loanAPR, expAPR, repayYears, investYears, ownAmount, ownFreq, payFromPortfolio, inflOn, inflAPR, fxOn, fxTotal, tableView };
+      return { amount, start, end, loanAPR, expAPR, repayYears, investYears, ownAmount, ownFreq, initialOwn, payFromPortfolio, inflOn, inflAPR, fxOn, fxTotal, tableView };
     }
 
     // ===== Core simulation (DUO & Eigen apart; FX en inflatie achteraf) =====
@@ -331,7 +336,7 @@
       const ownMonthly = (cfg.ownFreq==='monthly') ? cfg.ownAmount : (cfg.ownFreq==='weekly' ? cfg.ownAmount * (52/12) : 0);
 
       let principal=0; // schuld
-      let portD=0, portO=0; // DUO-deel / Eigen-deel portefeuille
+      let portD=0, portO=cfg.initialOwn||0; // DUO-deel / Eigen-deel portefeuille (start met initiële eigen inleg)
       let totalInterest=0, totalInleg=0, totalDUOInleg=0, totalOwnInleg=0;
       const labels=[], arrPort=[], arrDebt=[], arrNet=[], arrPay=[], arrInt=[], arrExternalPay=[], arrPortfolioPay=[], arrInlegDuo=[], arrInlegOwn=[], arrInlegTotal=[];
       let depletedAt=null;
@@ -340,10 +345,11 @@
         const date = addMonths(cfg.start, i); labels.push(`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`);
 
         const cDuo = (i < monthsBorrowed) ? cfg.amount : 0;
+        const starter = (i===0 ? (cfg.initialOwn||0) : 0);
         const cOwn = (i < monthsInvest) ? ownMonthly : 0;
-        portD += cDuo; portO += cOwn;
-        totalDUOInleg += cDuo; totalOwnInleg += cOwn; totalInleg += (cDuo + cOwn);
-        arrInlegDuo.push(cDuo); arrInlegOwn.push(cOwn); arrInlegTotal.push(cDuo + cOwn);
+        portD += cDuo; portO += (starter + cOwn);
+        totalDUOInleg += cDuo; totalOwnInleg += (starter + cOwn); totalInleg += (cDuo + starter + cOwn);
+        arrInlegDuo.push(cDuo); arrInlegOwn.push(starter + cOwn); arrInlegTotal.push(cDuo + starter + cOwn);
 
         principal += cDuo;
         const interest = principal * rL; principal += interest; totalInterest += interest; arrInt.push(interest);
@@ -526,22 +532,22 @@
     function wireChartToggle(id,wrapId){ const inp=gi(id); const wrap=gi(wrapId); if(!inp||!wrap) return; const sync=()=>wrap.setAttribute('aria-checked', String(!!inp.checked)); inp.addEventListener('change', ()=>{ sync(); update(); }); sync(); }
 
     function wireInputs(){
-      ['inpAmount','inpLoanAPR','inpStart','inpEnd','inpRepayYears','inpInvestYears','selReturn','inpCustomReturn','selOwnFreq','inpOwn','selTableView','inpInflAPR','inpFXAPR']
+      ['inpAmount','inpLoanAPR','inpStart','inpEnd','inpRepayYears','inpInvestYears','selReturn','inpCustomReturn','selOwnFreq','inpOwn','inpInitialOwn','selTableView','inpInflAPR','inpFXAPR']
         .forEach(id=>{ const el=gi(id); if(!el) return; el.addEventListener('input',()=>{ if(id==='selReturn'){ const s=gi('selReturn'); const c=gi('inpCustomReturn'); if(s&&c){ c.style.display = s.value==='custom' ? 'block' : 'none'; } } update(); }); el.addEventListener('change', update); });
       wireToggleInput('tglPay','tglPayWrap', update);
       wireToggleInput('tglInfl','tglInflWrap', update);
       wireToggleInput('tglFX','tglFXWrap', update);
       wireToggleInput('tglDark','tglDarkWrap', ()=>{ applyChartTheme(); update(); });
       wireChartToggle('togNet','wrapNet'); wireChartToggle('togPort','wrapPort'); wireChartToggle('togDebt','wrapDebt');
-      const btn=gi('btnReset'); if(btn){ btn.addEventListener('click', (e)=>{ e.preventDefault(); setDefaultDates(); const set=(id,val)=>{ const el=gi(id); if(el) el.value=val; }; set('inpAmount',724); set('inpLoanAPR',2.57); const sr=gi('selReturn'); if(sr) sr.value='8'; set('inpCustomReturn',''); set('inpRepayYears',35); set('inpInvestYears',39); setText('repayYearsOut','35 jaar'); setText('investYearsOut','39 jaar'); set('inpOwn',0); const of=gi('selOwnFreq'); if(of) of.value='monthly'; set('inpInflAPR',2.1); set('inpFXAPR',0); const ck=(id,val)=>{ const el=gi(id); if(el){ el.checked=val; el.dispatchEvent(new Event('change')); } }; ck('tglPay',false); ck('tglInfl',false); ck('tglFX',false); ck('tglDark',true); ck('togNet',false); ck('togPort',true); ck('togDebt',false); update(); }); }
+      const btn=gi('btnReset'); if(btn){ btn.addEventListener('click', (e)=>{ e.preventDefault(); setDefaultDates(); const set=(id,val)=>{ const el=gi(id); if(el) el.value=val; }; set('inpAmount',724); set('inpLoanAPR',2.57); const sr=gi('selReturn'); if(sr) sr.value='8'; set('inpCustomReturn',''); set('inpRepayYears',35); set('inpInvestYears',39); setText('repayYearsOut','35 jaar'); setText('investYearsOut','39 jaar'); set('inpOwn',0); set('inpInitialOwn',0); const of=gi('selOwnFreq'); if(of) of.value='monthly'; set('inpInflAPR',2.1); set('inpFXAPR',0); const ck=(id,val)=>{ const el=gi(id); if(el){ el.checked=val; el.dispatchEvent(new Event('change')); } }; ck('tglPay',false); ck('tglInfl',false); ck('tglFX',false); ck('tglDark',true); ck('togNet',false); ck('togPort',true); ck('togDebt',false); update(); }); }
     }
 
     function selfTests(){
       try{
         console.assert(monthsBetween(new Date('2024-01-24'), new Date('2024-02-24')) === 1, 'monthsBetween 1m');
         console.assert(monthsInclusive(new Date('2024-01-24'), new Date('2024-03-24')) === 3, 'monthsInclusive 3m');
-        const cfg={ amount:724, start:new Date('2024-08-24'), end:new Date('2026-07-24'), loanAPR:0.0257, expAPR:0.08, repayYears:35, investYears:39, ownAmount:100, ownFreq:'monthly', payFromPortfolio:false, inflOn:false, inflAPR:0, fxOn:false, fxTotal:0 };
-        const s=simulate(cfg); const last=s.arrPort.length-1; console.assert(Number.isFinite(s.arrPort[last]), 'arrPort finite');
+        const cfg={ amount:724, start:new Date('2024-08-24'), end:new Date('2026-07-24'), loanAPR:0.0257, expAPR:0.08, repayYears:35, investYears:39, ownAmount:100, ownFreq:'monthly', initialOwn:500, payFromPortfolio:false, inflOn:false, inflAPR:0, fxOn:false, fxTotal:0 };
+        const s=simulate(cfg); const last=s.arrPort.length-1; console.assert(Number.isFinite(s.arrPort[last]), 'arrPort finite'); console.assert(s.arrInlegOwn[0] >= 500, 'initial own deposit included');
       }catch(e){ console.warn('Self-tests warning:', e); }
     }
 
@@ -554,4 +560,3 @@
   </script>
 </body>
 </html>
-
