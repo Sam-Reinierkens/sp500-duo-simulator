@@ -36,7 +36,8 @@
     .grid{display:grid;gap:var(--card-gap);grid-template-columns:minmax(360px,1fr) minmax(720px,1.6fr)}
     @media(max-width:980px){.grid{grid-template-columns:1fr}}
     .card{background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;overflow:hidden}
-    .card-settings{overflow:visible}
+    /* Important: clip contents so nothing sticks outside the settings card */
+    .card-settings{overflow:hidden}
     .card h2{margin:0 0 10px;font-size:1.05rem}
     .badge{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--muted);font-size:.85rem;line-height:1}
     .badge.on{color:#fff;border-color:color-mix(in oklab,var(--accent),#fff 10%);background:color-mix(in oklab,var(--accent),transparent 85%)}
@@ -44,13 +45,17 @@
     .controls{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;align-items:start}
     .field{display:grid;grid-template-rows:auto 44px;gap:6px}
     .field label{font-size:.9rem;color:var(--muted);line-height:1.2}
-    input[type="number"],input[type="date"],select{height:44px;border-radius:var(--radius-input);border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:var(--text);padding:0 12px;outline:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.03);font-variant-numeric:tabular-nums;transition:box-shadow .2s,border-color .2s,background .2s}
+
+    /* Ensure ALL inputs/selects fill the full column width */
+    input[type="number"], input[type="date"], select{
+      height:44px;width:100%;display:block;border-radius:var(--radius-input);border:1px solid rgba(255,255,255,.1);
+      background:rgba(255,255,255,.06);color:var(--text);padding:0 12px;outline:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+      font-variant-numeric:tabular-nums;transition:box-shadow .2s,border-color .2s,background .2s
+    }
     input[type="number"]:focus,input[type="date"]:focus,select:focus{border-color:color-mix(in oklab,var(--accent),#fff 10%); box-shadow:0 0 0 3px color-mix(in oklab,var(--accent),transparent 85%)}
 
-    /* Light mode */
-    body.light input[type="number"],
-    body.light input[type="date"],
-    body.light select{
+    /* In light mode inputs get elevation */
+    body.light input[type="number"], body.light input[type="date"], body.light select{
       background:#ffffff; border:1px solid rgba(0,0,0,.12);
       box-shadow:0 2px 6px rgba(0,0,0,.08), inset 0 1px 0 rgba(255,255,255,.5);
     }
@@ -67,6 +72,9 @@
     .tgl input:checked + .track{background:color-mix(in oklab,var(--accent),white 8%)}
     .tgl input:checked + .track .thumb{transform:translateX(32px);background:#fff}
     .tgl .txt{font-size:.92rem;white-space:nowrap}
+
+    /* Make the two toggles INSIDE the settings grid as long as other inputs */
+    .controls .field .tgl{width:100%;min-width:0;justify-content:flex-start}
 
     .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:stretch}
     @media(max-width:1100px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -119,7 +127,7 @@
             <input id="inpAmount" type="number" min="0" step="1" value="724" />
           </div>
           <div class="field">
-            <label>DUO-rente per jaar (%)</label>
+            <label>DUO‑rente per jaar (%)</label>
             <input id="inpLoanAPR" type="number" min="0" step="0.01" value="2.57" />
           </div>
           <div class="field">
@@ -127,7 +135,7 @@
             <input id="inpStart" type="date" />
           </div>
           <div class="field">
-            <label>Einde studie / laatste DUO-uitkering</label>
+            <label>Einde studie / laatste DUO‑uitkering</label>
             <input id="inpEnd" type="date" />
           </div>
 
@@ -208,7 +216,7 @@
         </div>
 
         <div class="sub" style="margin-top:6px">
-          Aanname: 24 maanden aanloopfase na <strong>einde studie/laatste DUO-uitkering</strong>. Rente maandelijks samengesteld. Aflossing annuïtair over de gekozen looptijd.
+          Aanname: 24 maanden aanloopfase na <strong>einde studie/laatste DUO‑uitkering</strong>. Rente maandelijks samengesteld. Aflossing annuïtair over de gekozen looptijd.
         </div>
         <div class="toolbar" style="margin-top:12px; gap:8px; flex-wrap:wrap; display:flex;">
           <button id="btnReset" class="secondary">Reset</button>
@@ -222,10 +230,10 @@
           <span id="viewModeBadge" class="badge">Nominaal</span>
         </div>
         <div class="kpis">
-          <div class="kpi"><div class="label">Totale inleg</div><div class="value" id="kInleg">€ 0</div><div class="tag" id="kMonths">—</div></div>
-          <div class="kpi"><div class="label">Totale extern betaalde DUO</div><div class="value" id="kExternal">€ 0</div><div class="tag">Aflossingen buiten portefeuille</div></div>
-          <div class="kpi"><div class="label">Eindwaarde portefeuille</div><div class="value" id="kPort">€ 0</div><div class="tag" id="kPortTag">—</div></div>
-          <div class="kpi"><div class="label">Netto resultaat</div><div class="value" id="kNetto">€ 0</div><div class="tag">≈ Eindportefeuille – extern betaalde DUO</div></div>
+          <div class="kpi"><div class="label">Totale inleg</div><div class="value" id="kInleg">€ 0</div><div class="tag" id="kMonths">—</div></div>
+          <div class="kpi"><div class="label">Totale extern betaalde DUO</div><div class="value" id="kExternal">€ 0</div><div class="tag">Aflossingen buiten portefeuille</div></div>
+          <div class="kpi"><div class="label">Eindwaarde portefeuille</div><div class="value" id="kPort">€ 0</div><div class="tag" id="kPortTag">—</div></div>
+          <div class="kpi"><div class="label">Netto resultaat</div><div class="value" id="kNetto">€ 0</div><div class="tag">≈ Eindportefeuille – extern betaalde DUO</div></div>
         </div>
 
         <div class="toggles" id="seriesToggles">
@@ -257,7 +265,7 @@
             <tr>
               <th style="min-width:120px">Periode</th>
               <th>Totale inleg (€)</th>
-              <th>DUO-inleg (€)</th>
+              <th>DUO‑inleg (€)</th>
               <th>Eigen inleg (€)</th>
               <th>Aflossing DUO (€)</th>
               <th>Extern betaald (€)</th>
