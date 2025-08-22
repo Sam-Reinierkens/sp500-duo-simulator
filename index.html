@@ -36,7 +36,6 @@
     .grid{display:grid;gap:var(--card-gap);grid-template-columns:minmax(360px,1fr) minmax(720px,1.6fr)}
     @media(max-width:980px){.grid{grid-template-columns:1fr}}
     .card{background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;overflow:hidden}
-    /* Important: clip contents so nothing sticks outside the settings card */
     .card-settings{overflow:hidden}
     .card h2{margin:0 0 10px;font-size:1.05rem}
     .badge{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--muted);font-size:.85rem;line-height:1}
@@ -46,7 +45,6 @@
     .field{display:grid;grid-template-rows:auto 44px;gap:6px}
     .field label{font-size:.9rem;color:var(--muted);line-height:1.2}
 
-    /* Ensure ALL inputs/selects fill the full column width */
     input[type="number"], input[type="date"], select{
       height:44px;width:100%;display:block;border-radius:var(--radius-input);border:1px solid rgba(255,255,255,.1);
       background:rgba(255,255,255,.06);color:var(--text);padding:0 12px;outline:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
@@ -54,7 +52,6 @@
     }
     input[type="number"]:focus,input[type="date"]:focus,select:focus{border-color:color-mix(in oklab,var(--accent),#fff 10%); box-shadow:0 0 0 3px color-mix(in oklab,var(--accent),transparent 85%)}
 
-    /* In light mode inputs get elevation */
     body.light input[type="number"], body.light input[type="date"], body.light select{
       background:#ffffff; border:1px solid rgba(0,0,0,.12);
       box-shadow:0 2px 6px rgba(0,0,0,.08), inset 0 1px 0 rgba(255,255,255,.5);
@@ -72,8 +69,6 @@
     .tgl input:checked + .track{background:color-mix(in oklab,var(--accent),white 8%)}
     .tgl input:checked + .track .thumb{transform:translateX(32px);background:#fff}
     .tgl .txt{font-size:.92rem;white-space:nowrap}
-
-    /* Make the two toggles INSIDE the settings grid as long as other inputs */
     .controls .field .tgl{width:100%;min-width:0;justify-content:flex-start}
 
     .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:stretch}
@@ -94,7 +89,6 @@
     th:first-child,td:first-child{position:sticky;left:0;z-index:2;background:var(--firstcol-bg);text-align:left;min-width:120px}
     thead th:first-child{z-index:4}
 
-    /* 3-op-een-rij serie-toggles boven de grafiek */
     #seriesToggles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:stretch;margin:10px 0}
     #seriesToggles .tgl{min-width:0;width:100%;justify-content:flex-start;align-items:center;text-align:left;padding-inline:12px}
     #seriesToggles .track{margin-right:10px}
@@ -127,7 +121,7 @@
             <input id="inpAmount" type="number" min="0" step="1" value="724" />
           </div>
           <div class="field">
-            <label>DUO‑rente per jaar (%)</label>
+            <label>DUO-rente per jaar (%)</label>
             <input id="inpLoanAPR" type="number" min="0" step="0.01" value="2.57" />
           </div>
           <div class="field">
@@ -135,7 +129,7 @@
             <input id="inpStart" type="date" />
           </div>
           <div class="field">
-            <label>Einde studie / laatste DUO‑uitkering</label>
+            <label>Einde studie / laatste DUO-uitkering</label>
             <input id="inpEnd" type="date" />
           </div>
 
@@ -173,7 +167,6 @@
             </select>
           </div>
 
-          <!-- Inflatie links (veld) + toggle rechts -->
           <div class="field">
             <label>Inflatie p/j (%)</label>
             <input id="inpInflAPR" type="number" min="0" step="0.1" value="2.1" />
@@ -187,7 +180,6 @@
             </label>
           </div>
 
-          <!-- FX links (veld) + toggle rechts -->
           <div class="field">
             <label>USD/EUR totaal (%)</label>
             <input id="inpFXAPR" type="number" step="0.1" value="0" />
@@ -216,7 +208,8 @@
         </div>
 
         <div class="sub" style="margin-top:6px">
-          Aanname: 24 maanden aanloopfase na <strong>einde studie/laatste DUO‑uitkering</strong>. Rente maandelijks samengesteld. Aflossing annuïtair over de gekozen looptijd.
+          Fases volgens DUO: <strong>rente maandelijks samengesteld</strong>. Tijdens studie rente <strong>per kalenderjaar</strong>.
+          <strong>Aanloopfase</strong>: 1 januari na je laatste DUO-maand t/m 31 december twee jaar later. <strong>Aflossen</strong> start 1 januari daarna (rente 5 jaar vast per blok).
         </div>
         <div class="toolbar" style="margin-top:12px; gap:8px; flex-wrap:wrap; display:flex;">
           <button id="btnReset" class="secondary">Reset</button>
@@ -230,10 +223,10 @@
           <span id="viewModeBadge" class="badge">Nominaal</span>
         </div>
         <div class="kpis">
-          <div class="kpi"><div class="label">Totale inleg</div><div class="value" id="kInleg">€ 0</div><div class="tag" id="kMonths">—</div></div>
-          <div class="kpi"><div class="label">Totale extern betaalde DUO</div><div class="value" id="kExternal">€ 0</div><div class="tag">Aflossingen buiten portefeuille</div></div>
-          <div class="kpi"><div class="label">Eindwaarde portefeuille</div><div class="value" id="kPort">€ 0</div><div class="tag" id="kPortTag">—</div></div>
-          <div class="kpi"><div class="label">Netto resultaat</div><div class="value" id="kNetto">€ 0</div><div class="tag">≈ Eindportefeuille – extern betaalde DUO</div></div>
+          <div class="kpi"><div class="label">Totale inleg</div><div class="value" id="kInleg">€ 0</div><div class="tag" id="kMonths">—</div></div>
+          <div class="kpi"><div class="label">Totale extern betaalde DUO</div><div class="value" id="kExternal">€ 0</div><div class="tag">Aflossingen buiten portefeuille</div></div>
+          <div class="kpi"><div class="label">Eindwaarde portefeuille</div><div class="value" id="kPort">€ 0</div><div class="tag" id="kPortTag">—</div></div>
+          <div class="kpi"><div class="label">Netto resultaat</div><div class="value" id="kNetto">€ 0</div><div class="tag">≈ Eindportefeuille – extern betaalde DUO</div></div>
         </div>
 
         <div class="toggles" id="seriesToggles">
@@ -265,11 +258,11 @@
             <tr>
               <th style="min-width:120px">Periode</th>
               <th>Totale inleg (€)</th>
-              <th>DUO‑inleg (€)</th>
+              <th>DUO-inleg (€)</th>
               <th>Eigen inleg (€)</th>
               <th>Aflossing DUO (€)</th>
               <th>Extern betaald (€)</th>
-              <th>Rente DUO (som) (€)</th>
+              <th>Rente DUO (optelsom) (€)</th>
               <th>Schuld einde periode (€)</th>
               <th>Portefeuille einde periode (€)</th>
               <th>Saldo (portf − schuld) (€)</th>
@@ -293,6 +286,40 @@
     function addMonths(date, n) { const d = new Date(date.getTime()); const day = d.getDate(); d.setMonth(d.getMonth() + n); if (d.getDate() !== day) d.setDate(0); return d; }
     function monthsBetween(a, b) { let y = b.getFullYear() - a.getFullYear(); let m = b.getMonth() - a.getMonth(); let t = y * 12 + m; if (b.getDate() < a.getDate()) t -= 1; return Math.max(0, t); }
     function monthsInclusive(start, end) { let c = 0, cur = new Date(start); while (cur <= end) { c++; cur = addMonths(cur, 1); } return c; }
+    const ymd = (d)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+    // ===== Known DUO rates (SF35) per kalenderjaar / blok-startjaar =====
+    // Voor jaren die hier niet instaan wordt inpLoanAPR gebruikt.
+    const RATES_BY_YEAR = {
+      2024: 0.0256,
+      2025: 0.0257
+    };
+
+    function blockStartYearFor(date, end){
+      const y1 = end.getFullYear() + 1;
+      const k = Math.floor((date.getFullYear() - y1) / 5);
+      return y1 + k * 5;
+    }
+
+    function monthlyLoanRate(end, defaultAPR, date){
+      const y = date.getFullYear();
+      const janAfter = new Date(end.getFullYear()+1,0,1);
+      let apr;
+      if (date < janAfter){
+        apr = (RATES_BY_YEAR[y] ?? defaultAPR);
+      } else {
+        const by = blockStartYearFor(date, end);
+        apr = (RATES_BY_YEAR[by] ?? defaultAPR);
+      }
+      return Math.pow(1 + apr, 1/12) - 1;
+    }
+
+    function phases(end){
+      const graceStart = new Date(end.getFullYear()+1,0,1);
+      const graceEnd   = new Date(end.getFullYear()+2,11,31);
+      const repayStart = new Date(end.getFullYear()+3,0,1);
+      return { graceStart, graceEnd, repayStart };
+    }
 
     // ===== Read inputs =====
     function getInputs() {
@@ -304,48 +331,65 @@
       const endStr = gi('inpEnd')?.value || '';
       const start = startStr ? new Date(startStr) : new Date();
       const end = endStr ? new Date(endStr) : new Date();
-      const expAPR = Math.max(0, Number(gi('inpReturnAPR')?.value?.replace(',', '.') ?? 0) || 0) / 100; // direct invoer
+      const expAPR = Math.max(0, Number(gi('inpReturnAPR')?.value?.replace(',', '.') ?? 0) || 0) / 100;
       const repayYears = clamp(parseInt(gi('inpRepayYears')?.value || '35', 10), 1, 35);
       const investYears = clamp(parseInt(gi('inpInvestYears')?.value || '39', 10), 1, 50);
       const ownAmount = Math.max(0, Number(gi('inpOwn')?.value?.replace(',', '.') ?? 0) || 0);
       const initialOwn = Math.max(0, Number(gi('inpInitialOwn')?.value?.replace(',', '.') ?? 0) || 0);
-      const ownFreq = gi('selOwnFreq')?.value || 'monthly'; // 'monthly' | 'weekly' | 'off'
-      const payFromPortfolio = !!gi('tglPay')?.checked; // AAN = uit portefeuille
-      const inflOn = !!gi('tglInfl')?.checked; // reëel tonen
-      const fxOn = !!gi('tglFX')?.checked;     // FX toepassen
+      const ownFreq = gi('selOwnFreq')?.value || 'monthly';
+      const payFromPortfolio = !!gi('tglPay')?.checked;
+      const inflOn = !!gi('tglInfl')?.checked;
+      const fxOn = !!gi('tglFX')?.checked;
       const tableView = gi('selTableView')?.value || 'month';
       return { amount, start, end, loanAPR, expAPR, repayYears, investYears, ownAmount, ownFreq, initialOwn, payFromPortfolio, inflOn, inflAPR, fxOn, fxTotal, tableView };
     }
 
-    // ===== Core simulation (DUO & Eigen apart; FX en inflatie achteraf) =====
+    // ===== Core simulation (met DUO-fases & rentevast) =====
     function simulate(cfg) {
-      const rL = Math.pow(1 + cfg.loanAPR, 1 / 12) - 1; // loan monthly
-      const rI = Math.pow(1 + cfg.expAPR, 1 / 12) - 1;  // invest monthly
-
-      const monthsBorrowed = monthsInclusive(cfg.start, cfg.end); // inclusive DUO maanden
-      const grad = cfg.end; const graceEnd = addMonths(grad, 24);
-      const repayStartDate = addMonths(graceEnd, 1);
-      const repayStartIdx = monthsBetween(cfg.start, repayStartDate);
+      const rI = Math.pow(1 + cfg.expAPR, 1 / 12) - 1;
+      const monthsBorrowed = monthsInclusive(cfg.start, cfg.end);
+      const { graceStart, graceEnd, repayStart } = phases(cfg.end);
+      const repayStartIdx = monthsBetween(cfg.start, repayStart);
       const repayMonths = cfg.repayYears * 12;
-      const monthsInvest = cfg.investYears * 12; // looptijd beleggen vanaf eerste maand
+      const monthsInvest = cfg.investYears * 12;
 
-      const totalMonths = monthsInvest; // grafiek-/simulatieduur = beleggingshorizon
+      const totalMonths = monthsInvest;
 
-      // Bepaal schuld op start aflossen (B0)
-      let principalDry = 0; for(let i=0;i<repayStartIdx;i++){ const c=(i<monthsBorrowed)?cfg.amount:0; principalDry += c; principalDry += principalDry * rL; }
+      let principalDry = 0;
+      for(let i=0;i<repayStartIdx;i++){
+        const date = addMonths(cfg.start, i);
+        const rL = monthlyLoanRate(cfg.end, cfg.loanAPR, date);
+        const c = (i < monthsBorrowed) ? cfg.amount : 0;
+        principalDry += c;
+        principalDry += principalDry * rL;
+      }
       const B0 = principalDry;
-      const r = rL, N = repayMonths; const P = (N>0) ? (r>0 ? B0 * (r / (1 - Math.pow(1+r, -N))) : (B0 / N)) : 0; // annuïteit
+
+      const blockChangeIdxs = [];
+      let nextBlock = new Date(cfg.end.getFullYear()+1, 0, 1);
+      while (nextBlock <= addMonths(repayStart, repayMonths)) {
+        if (nextBlock >= repayStart) {
+          const idx = monthsBetween(cfg.start, nextBlock);
+          if (idx >= repayStartIdx && idx < repayStartIdx + repayMonths) blockChangeIdxs.push(idx);
+        }
+        nextBlock = new Date(nextBlock.getFullYear()+5, 0, 1);
+      }
 
       const ownMonthly = (cfg.ownFreq==='monthly') ? cfg.ownAmount : (cfg.ownFreq==='weekly' ? cfg.ownAmount * (52/12) : 0);
 
-      let principal=0; // schuld
-      let portD=0, portO=cfg.initialOwn||0; // DUO-deel / Eigen-deel portefeuille (start met initiële eigen inleg)
+      let principal=0;
+      let portD=0, portO=cfg.initialOwn||0;
       let totalInterest=0, totalInleg=0, totalDUOInleg=0, totalOwnInleg=0;
       const labels=[], arrPort=[], arrDebt=[], arrNet=[], arrPay=[], arrInt=[], arrExternalPay=[], arrPortfolioPay=[], arrInlegDuo=[], arrInlegOwn=[], arrInlegTotal=[];
       let depletedAt=null;
 
+      let currentPayment = 0;
+
       for (let i=0;i<totalMonths;i++){
-        const date = addMonths(cfg.start, i); labels.push(`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`);
+        const date = addMonths(cfg.start, i);
+        labels.push(`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`);
+
+        const rL = monthlyLoanRate(cfg.end, cfg.loanAPR, date);
 
         const cDuo = (i < monthsBorrowed) ? cfg.amount : 0;
         const starter = (i===0 ? (cfg.initialOwn||0) : 0);
@@ -355,17 +399,31 @@
         arrInlegDuo.push(cDuo); arrInlegOwn.push(starter + cOwn); arrInlegTotal.push(cDuo + starter + cOwn);
 
         principal += cDuo;
-        const interest = principal * rL; principal += interest; totalInterest += interest; arrInt.push(interest);
+        const interest = principal * rL;
+        principal += interest;
+        totalInterest += interest;
+        arrInt.push(interest);
 
         let pay=0, payFromPort=0, payExternal=0;
-        if (i >= repayStartIdx) { pay = Math.min(P, principal); principal -= pay; }
+        if (i >= repayStartIdx) {
+          const monthsSinceRepay = i - repayStartIdx;
+          const remaining = Math.max(0, repayMonths - monthsSinceRepay);
+          const isBlockChange = (monthsSinceRepay === 0) || blockChangeIdxs.includes(i);
+          if (isBlockChange && remaining > 0){
+            const rForBlock = rL;
+            currentPayment = (rForBlock > 0) ? (principal * (rForBlock / (1 - Math.pow(1 + rForBlock, -remaining)))) : (principal / remaining);
+          }
+          pay = Math.min(currentPayment, principal);
+          principal -= pay;
+        }
 
         const portTotalBefore = portD + portO;
         if (cfg.payFromPortfolio && pay>0 && portTotalBefore>0){
-          payFromPort = Math.min(pay, portTotalBefore);
+          const payUse = Math.min(pay, portTotalBefore);
           const shareD = portD / portTotalBefore; const shareO = 1 - shareD;
-          portD -= payFromPort * shareD; portO -= payFromPort * shareO;
-          if (payFromPort < pay) payExternal = pay - payFromPort;
+          portD -= payUse * shareD; portO -= payUse * shareO;
+          payFromPort = payUse;
+          if (payUse < pay) payExternal = pay - payUse;
           if ((portD + portO) <= 0 && depletedAt === null){ depletedAt = date; portD = Math.max(0, portD); portO = Math.max(0, portO); }
         } else {
           payExternal = pay;
@@ -379,7 +437,6 @@
         arrPay.push(pay||0); arrExternalPay.push(payExternal||0); arrPortfolioPay.push(payFromPort||0);
       }
 
-      // FX achteraf (constante factor)
       if (cfg.fxOn && cfg.fxTotal !== 0){
         const f = 1 + cfg.fxTotal;
         for (let i=0;i<arrPort.length;i++){ arrPort[i]*=f; arrNet[i]*=f; }
@@ -393,10 +450,10 @@
 
       return { labels, arrPort, arrDebt, arrNet, arrPay, arrInt, arrExternalPay, arrPortfolioPay, arrInlegDuo, arrInlegOwn, arrInlegTotal,
         totals: { monthsBorrowed, monthsInvest, totalInleg, totalDUOInleg, totalOwnInleg, totalInterest, endPortfolio, endDebt, totalPaid, totalExternal, totalFromPortfolio, netResult: endPortfolio - totalExternal },
-        meta: { grad, repayStartDate, graceEnd, monthlyPayment: P, depletedAt, repayEndDate: addMonths(repayStartDate, repayMonths), investEndDate: addMonths(cfg.start, monthsInvest) } };
+        meta: { grad: cfg.end, graceStart, graceEnd, repayStartDate: repayStart, monthlyPayment: currentPayment, depletedAt, repayEndDate: addMonths(repayStart, repayMonths), investEndDate: addMonths(cfg.start, monthsInvest) } };
     }
 
-    // ===== Deflatie helper (reële weergave – NA FX) =====
+    // ===== Deflatie helper =====
     function deflateView(sim, inflAPR){
       const rInf = Math.pow(1 + inflAPR, 1/12) - 1;
       const df = (i) => 1 / Math.pow(1 + rInf, i);
@@ -420,20 +477,52 @@
     function groupRows(sim){
       const mode=gi('selTableView')?.value||'month';
       const rows=[];
-      const pushRow=(key,idxs)=>{
+      const pushRow=(key,idxs, cumRente)=>{
         const lastIdx=idxs[idxs.length-1];
         const sum=(arr)=>idxs.reduce((a,i)=>a+(arr[i]||0),0);
         rows.push({ key,
           inleg: sum(sim.arrInlegTotal), inlegDuo: sum(sim.arrInlegDuo), inlegOwn: sum(sim.arrInlegOwn),
-          pay: sum(sim.arrPay), external: sum(sim.arrExternalPay), rente: sum(sim.arrInt),
+          pay: sum(sim.arrPay), external: sum(sim.arrExternalPay), rente: cumRente,
           schuld: sim.arrDebt[lastIdx], port: sim.arrPort[lastIdx], saldo: sim.arrNet[lastIdx]
         });
       };
-      if (mode==='month'){ for (let i=0;i<sim.labels.length;i++) pushRow(sim.labels[i],[i]); }
-      else if (mode==='quarter'){
-        const groups={}; for (let i=0;i<sim.labels.length;i++){ const d=addMonths(new Date(gi('inpStart')?.value||Date.now()), i); const q=Math.floor(d.getMonth()/3)+1; const key=`${d.getFullYear()} Q${q}`; if(!groups[key]) groups[key]=[]; groups[key].push(i);} Object.keys(groups).forEach(k=>pushRow(k, groups[k]));
+
+      if (mode==='month'){
+        // cumulatieve rente t/m die maand
+        let running = 0;
+        for (let i=0;i<sim.labels.length;i++){
+          running += (sim.arrInt[i]||0);
+          pushRow(sim.labels[i], [i], running);
+        }
+      } else if (mode==='quarter'){
+        // totale rente per kwartaal
+        const groups={};
+        for (let i=0;i<sim.labels.length;i++){
+          const d=addMonths(new Date(gi('inpStart')?.value||Date.now()), i);
+          const q=Math.floor(d.getMonth()/3)+1;
+          const key=`${d.getFullYear()} Q${q}`;
+          if(!groups[key]) groups[key]=[];
+          groups[key].push(i);
+        }
+        Object.keys(groups).forEach(k=>{
+          const idxs=groups[k];
+          const rente = idxs.reduce((a,i)=>a+(sim.arrInt[i]||0),0);
+          pushRow(k, idxs, rente);
+        });
       } else {
-        const groups={}; for (let i=0;i<sim.labels.length;i++){ const d=addMonths(new Date(gi('inpStart')?.value||Date.now()), i); const key=`${d.getFullYear()}`; if(!groups[key]) groups[key]=[]; groups[key].push(i);} Object.keys(groups).forEach(k=>pushRow(k, groups[k]));
+        // totale rente per kalenderjaar
+        const groups={};
+        for (let i=0;i<sim.labels.length;i++){
+          const d=addMonths(new Date(gi('inpStart')?.value||Date.now()), i);
+          const key=`${d.getFullYear()}`;
+          if(!groups[key]) groups[key]=[];
+          groups[key].push(i);
+        }
+        Object.keys(groups).forEach(k=>{
+          const idxs=groups[k];
+          const rente = idxs.reduce((a,i)=>a+(sim.arrInt[i]||0),0);
+          pushRow(k, idxs, rente);
+        });
       }
       return rows;
     }
@@ -490,10 +579,9 @@
       setText('investYearsOut', `${gi('inpInvestYears')?.value||''} jaar`);
 
       const cfg=getInputs();
-      const simNomFX = simulate(cfg);               // eerst rekenen (nominaal), dan FX (in simulate)
-      const sim = cfg.inflOn ? deflateView(simNomFX, cfg.inflAPR) : simNomFX; // inflatie als reële weergave achteraf
+      const simNomFX = simulate(cfg);
+      const sim = cfg.inflOn ? deflateView(simNomFX, cfg.inflAPR) : simNomFX;
 
-      // KPI's
       const last = sim.labels.length - 1;
       const sum = (a)=>a.reduce((x,y)=>x+y,0);
       const totalInleg = sum(sim.arrInlegTotal);
@@ -511,22 +599,21 @@
       if (badge){ if (cfg.inflOn){ badge.textContent = 'Reëel (inflatie)'; badge.classList.add('on'); } else { badge.textContent = 'Nominaal'; badge.classList.remove('on'); } }
       setText('kPortTag', cfg.payFromPortfolio ? (simNomFX.meta.depletedAt?`Aflossingen uit portefeuille • leeg in ${simNomFX.meta.depletedAt.getFullYear()}-${String(simNomFX.meta.depletedAt.getMonth()+1).padStart(2,'0')}`:'Aflossingen uit portefeuille') : 'Aflossingen extern betaald');
 
-      const fmt=(d)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      const fmt=(d)=>ymd(d);
       const outside = monthsBetween(simNomFX.meta.repayStartDate, simNomFX.meta.repayEndDate) + monthsBetween(cfg.start, simNomFX.meta.repayStartDate) > cfg.investYears*12;
       const repayNote = outside
         ? `• <em>Aflossen loopt door tot</em>: <strong>${fmt(simNomFX.meta.repayEndDate)}</strong> (buiten weergave)`
         : `• Einde aflossen: <strong>${fmt(simNomFX.meta.repayEndDate)}</strong>`;
-      setHTML('phaseNote', `Einde studie/laatste uitkering: <strong>${fmt(simNomFX.meta.grad)}</strong> • Aanloopfase tot: <strong>${fmt(simNomFX.meta.graceEnd)}</strong> • Start aflossen: <strong>${fmt(simNomFX.meta.repayStartDate)}</strong> • Maandtermijn DUO: <strong>${euro2(simNomFX.meta.monthlyPayment)}</strong> ${repayNote} • <em>Beleggingshorizon eindigt</em>: <strong>${fmt(simNomFX.meta.investEndDate)}</strong>${cfg.inflOn?' • weergave: reëel (prijspeil startdatum)':''}`);
+      setHTML('phaseNote', `Laatste DUO-maand: <strong>${fmt(simNomFX.meta.grad)}</strong> • Aanloopfase: <strong>${fmt(simNomFX.meta.graceStart)}</strong> t/m <strong>${fmt(simNomFX.meta.graceEnd)}</strong> • Start aflossen: <strong>${fmt(simNomFX.meta.repayStartDate)}</strong> • Eerste maandtermijn (blok): <strong>${euro2(simNomFX.meta.monthlyPayment)}</strong> ${repayNote} • <em>Beleggingshorizon eindigt</em>: <strong>${fmt(simNomFX.meta.investEndDate)}</strong>${cfg.inflOn?' • weergave: reëel (prijspeil startdatum)':''}`);
 
       renderTable(sim);
 
-      // Chart
       const ch = ensureChart();
       if (ch){
         ch.data.labels = sim.labels;
         ch.data.datasets[0].data = sim.arrPort;
         ch.data.datasets[1].data = sim.arrNet;
-        ch.data.datasets[2].data = sim.arrDebt.map(v=>-v); // schuld onder nul
+        ch.data.datasets[2].data = sim.arrDebt.map(v=>-v);
 
         ch.data.datasets[0].hidden = !gi('togPort')?.checked;
         ch.data.datasets[1].hidden = !gi('togNet')?.checked;
@@ -540,7 +627,14 @@
     }
 
     // ===== Events & defaults =====
-    function setDefaultDates(){ const start=new Date('2024-08-24'); const end=new Date('2026-07-24'); const s=gi('inpStart'); const e=gi('inpEnd'); if(s) s.value=`${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`; if(e) e.value=`${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,'0')}-${String(end.getDate()).padStart(2,'0')}`; }
+    function setDefaultDates(){
+      // Gewijzigd naar jouw echte start/eind:
+      const start=new Date('2024-09-24');
+      const end=new Date('2026-07-24');
+      const s=gi('inpStart'); const e=gi('inpEnd');
+      if(s) s.value=`${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`;
+      if(e) e.value=`${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,'0')}-${String(end.getDate()).padStart(2,'0')}`;
+    }
 
     function wireToggleInput(inputId, wrapId, onChange){ const inp=gi(inputId); const wrap=gi(wrapId); if(!inp||!wrap) return; const sync=()=>wrap.setAttribute('aria-checked', String(!!inp.checked)); inp.addEventListener('change', ()=>{ if(inputId==='tglDark'){ document.body.classList.toggle('light', !inp.checked); } sync(); onChange&&onChange(); }); sync(); }
     function wireChartToggle(id,wrapId){ const inp=gi(id); const wrap=gi(wrapId); if(!inp||!wrap) return; const sync=()=>wrap.setAttribute('aria-checked', String(!!inp.checked)); inp.addEventListener('change', ()=>{ sync(); update(); }); sync(); }
@@ -560,12 +654,11 @@
       try{
         console.assert(monthsBetween(new Date('2024-01-24'), new Date('2024-02-24')) === 1, 'monthsBetween 1m');
         console.assert(monthsInclusive(new Date('2024-01-24'), new Date('2024-03-24')) === 3, 'monthsInclusive 3m');
-        const cfg={ amount:724, start:new Date('2024-08-24'), end:new Date('2026-07-24'), loanAPR:0.0257, expAPR:0.08, repayYears:35, investYears:39, ownAmount:100, ownFreq:'monthly', initialOwn:500, payFromPortfolio:false, inflOn:false, inflAPR:0, fxOn:false, fxTotal:0 };
+        const cfg={ amount:724, start:new Date('2024-09-24'), end:new Date('2026-07-24'), loanAPR:0.0257, expAPR:0.08, repayYears:35, investYears:39, ownAmount:100, ownFreq:'monthly', initialOwn:500, payFromPortfolio:false, inflOn:false, inflAPR:0, fxOn:false, fxTotal:0 };
         const s=simulate(cfg); const last=s.arrPort.length-1; console.assert(Number.isFinite(s.arrPort[last]), 'arrPort finite'); console.assert(s.arrInlegOwn[0] >= 500, 'initial own deposit included');
       }catch(e){ console.warn('Self-tests warning:', e); }
     }
 
-    // Boot
     document.addEventListener('DOMContentLoaded', ()=>{
       setDefaultDates();
       wireInputs();
