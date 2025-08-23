@@ -118,7 +118,7 @@
         <div class="controls">
           <div class="field">
             <label>Maandbedrag lenen (€)</label>
-            <input id="inpAmount" type="number" min="0" step="1" value="724" />
+            <input id="inpAmount" type="number" min="0" step="1" value="942.42" />
           </div>
           <div class="field">
             <label>DUO-rente per jaar (%)</label>
@@ -628,9 +628,9 @@
 
     // ===== Events & defaults =====
     function setDefaultDates(){
-      // Gewijzigd naar jouw echte start/eind:
+      // Defaults aangepast: start 24-09-2024, einde nu augustus: 24-08-2026
       const start=new Date('2024-09-24');
-      const end=new Date('2026-07-24');
+      const end=new Date('2026-08-24');
       const s=gi('inpStart'); const e=gi('inpEnd');
       if(s) s.value=`${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`;
       if(e) e.value=`${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,'0')}-${String(end.getDate()).padStart(2,'0')}`;
@@ -647,14 +647,14 @@
       wireToggleInput('tglFX','tglFXWrap', update);
       wireToggleInput('tglDark','tglDarkWrap', ()=>{ applyChartTheme(); update(); });
       wireChartToggle('togNet','wrapNet'); wireChartToggle('togPort','wrapPort'); wireChartToggle('togDebt','wrapDebt');
-      const btn=gi('btnReset'); if(btn){ btn.addEventListener('click', (e)=>{ e.preventDefault(); setDefaultDates(); const set=(id,val)=>{ const el=gi(id); if(el) el.value=val; }; set('inpAmount',724); set('inpLoanAPR',2.57); set('inpReturnAPR',8); set('inpRepayYears',35); set('inpInvestYears',39); setText('repayYearsOut','35 jaar'); setText('investYearsOut','39 jaar'); set('inpOwn',0); set('inpInitialOwn',0); const of=gi('selOwnFreq'); if(of) of.value='monthly'; set('inpInflAPR',2.1); set('inpFXAPR',0); const ck=(id,val)=>{ const el=gi(id); if(el){ el.checked=val; el.dispatchEvent(new Event('change')); } }; ck('tglPay',false); ck('tglInfl',false); ck('tglFX',false); ck('tglDark',true); ck('togNet',false); ck('togPort',true); ck('togDebt',false); update(); }); }
+      const btn=gi('btnReset'); if(btn){ btn.addEventListener('click', (e)=>{ e.preventDefault(); setDefaultDates(); const set=(id,val)=>{ const el=gi(id); if(el) el.value=val; }; set('inpAmount',942.42); set('inpLoanAPR',2.57); set('inpReturnAPR',8); set('inpRepayYears',35); set('inpInvestYears',39); setText('repayYearsOut','35 jaar'); setText('investYearsOut','39 jaar'); set('inpOwn',0); set('inpInitialOwn',0); const of=gi('selOwnFreq'); if(of) of.value='monthly'; set('inpInflAPR',2.1); set('inpFXAPR',0); const ck=(id,val)=>{ const el=gi(id); if(el){ el.checked=val; el.dispatchEvent(new Event('change')); } }; ck('tglPay',false); ck('tglInfl',false); ck('tglFX',false); ck('tglDark',true); ck('togNet',false); ck('togPort',true); ck('togDebt',false); update(); }); }
     }
 
     function selfTests(){
       try{
         console.assert(monthsBetween(new Date('2024-01-24'), new Date('2024-02-24')) === 1, 'monthsBetween 1m');
         console.assert(monthsInclusive(new Date('2024-01-24'), new Date('2024-03-24')) === 3, 'monthsInclusive 3m');
-        const cfg={ amount:724, start:new Date('2024-09-24'), end:new Date('2026-07-24'), loanAPR:0.0257, expAPR:0.08, repayYears:35, investYears:39, ownAmount:100, ownFreq:'monthly', initialOwn:500, payFromPortfolio:false, inflOn:false, inflAPR:0, fxOn:false, fxTotal:0 };
+        const cfg={ amount:942.42, start:new Date('2024-09-24'), end:new Date('2026-08-24'), loanAPR:0.0257, expAPR:0.08, repayYears:35, investYears:39, ownAmount:100, ownFreq:'monthly', initialOwn:500, payFromPortfolio:false, inflOn:false, inflAPR:0, fxOn:false, fxTotal:0 };
         const s=simulate(cfg); const last=s.arrPort.length-1; console.assert(Number.isFinite(s.arrPort[last]), 'arrPort finite'); console.assert(s.arrInlegOwn[0] >= 500, 'initial own deposit included');
       }catch(e){ console.warn('Self-tests warning:', e); }
     }
